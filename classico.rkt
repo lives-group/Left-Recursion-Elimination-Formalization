@@ -18,7 +18,7 @@
 (define g-->
     (reduction-relation G
           (--> [(nonterminal ((nonterminal t ...) seq ... ) ) production ...] 
-               [(nonterminal ((t ... nonterminal) seq ... ) ) production ...])
+               [(nonterminal (seq ... (t ... nonterminal) ) ) production ...])
           (--> [(nonterminal ((terminal t ...) seq ... ) ) production ...] 
                [(nonterminal ( seq ...  (terminal t ...) ) ) production ...])
           (--> [(nonterminal ((nonterminal_1 t ...) seq ... ) ) production ...] 
@@ -43,4 +43,3 @@
 
 ; Cvs sobre o "*" no final da sequência
 ; cvs sobre a criação de um novo n terminal
-; Cvs sobre ε
