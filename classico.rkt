@@ -17,7 +17,7 @@
   (reduction-relation G
     (-->
      [(nonterminal ((terminal t ...) ... (nonterminal t_1 ...) seq_2 ... )) production_1 ...] 
-     [concat-grammar (production_1 ...) (eliminate-left-recursion (new-nonterminal nonterminal ((terminal t ...) ... (nonterminal t_1 ...) seq_2 ... )))] "A -> Aα")
+     [concat-grammar (production_1 ...) (eliminate-left-recursion (new-production nonterminal ((terminal t ...) ... (nonterminal t_1 ...) seq_2 ... )))] "A -> Aα")
 
      (-->
       [(nonterminal ((terminal t ...) ... (nonterminal_1 t ...) ... ) production_1 ...)] 
@@ -26,9 +26,9 @@
 
 ; Função que cria uma novo não terminal que produz ε
 (define-metafunction G
-  new-nonterminal : nonterminal rhs -> grammar
+  new-production : nonterminal rhs -> grammar
 
-  [(new-nonterminal nonterminal ((terminal t ...) ...  (nonterminal_1 t_2 ...) ... (nonterminal t_1 ...) seq_2 ... )) 
+  [(new-production nonterminal ((terminal t ...) ...  (nonterminal_1 t_2 ...) ... (nonterminal t_1 ...) seq_2 ... )) 
    ((nonterminal_new ((ε)))(nonterminal ((terminal t ...) ... (nonterminal_1 t_2 ...) ... (nonterminal t_1 ...) seq_2 ... )))
    (where nonterminal_new ,(variable-not-in (term nonterminal) (term nonterminal) ))])
 
