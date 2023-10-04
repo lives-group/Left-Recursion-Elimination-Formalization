@@ -4,7 +4,7 @@
 ; Definição da gramática
 (define-language G
   [nonterminal V]
-  [terminal number ε]
+  [terminal number]
   [rhs (seq ...)]
   [seq (t ...)]
   [t nonterminal terminal]
@@ -24,12 +24,12 @@
       [production_1 ... (nonterminal ((terminal t ...) ... (nonterminal_1 t ...) ... ))])
      ))
 
-; Função que cria uma novo não terminal que produz ε
+; Função que cria uma novo não terminal que produz o vazio
 (define-metafunction G
   new-production : nonterminal rhs -> grammar
 
   [(new-production nonterminal ((terminal t ...) ...  (nonterminal_1 t_2 ...) ... (nonterminal t_1 ...) seq_2 ... )) 
-   ((nonterminal_new ((ε)))(nonterminal ((terminal t ...) ... (nonterminal_1 t_2 ...) ... (nonterminal t_1 ...) seq_2 ... )))
+   ((nonterminal_new (()))(nonterminal ((terminal t ...) ... (nonterminal_1 t_2 ...) ... (nonterminal t_1 ...) seq_2 ... )))
    (where nonterminal_new ,(variable-not-in (term nonterminal) (term nonterminal) ))])
 
 ; Função que elimina a recursão à esquerda
@@ -54,17 +54,38 @@
 
 ; Função que ordena a gramática
 (define (order-rhs productions)
+
+  (define nonterminals (enumerate (remove-duplicates (map car productions))))
+
   (map
    (lambda (p)
      (define rhs (car (cdr p)))
      (define head (car p))
 
-     (let ((terminal (filter (lambda (x) (or (number? (car x)) (equal? (car x) 'ε))) rhs))
-           (nonterminal (filter (lambda (x) (and (not (number? (car x))) (not (equal? (car x) 'ε)) (not (equal? (car x) head)))) rhs))
-           (recursion (filter (lambda (x) (and (not (number? (car x))) (not (equal? (car x) 'ε)) (equal? (car x) head))) rhs)))
+     (let ((terminal (filter (lambda (x) (or (number? (car x)) (equal? (car x) '()))) rhs))
+           (nonterminal (filter (lambda (x) (and (not (number? (car x))) (not (equal? (car x) '())) (not (equal? (car x) head)))) rhs))
+           (recursion (filter (lambda (x) (and (not (number? (car x))) (not (equal? (car x) '())) (equal? (car x) head))) rhs)))
        (cons (car p) (list (append terminal recursion nonterminal))))
      )
-   productions))
+  productions)
+
+  (list nonterminals productions) 
+)
+
+; Função que remove elementos repetidos de uma lista
+(define (remove-duplicates lst)
+  (cond
+    [(empty? lst) empty]
+    [(member (first lst) (rest lst)) (remove-duplicates (rest lst))]
+    [else (cons (first lst) (remove-duplicates (rest lst)))]))
+
+; Função que enumera os elementos de uma lista ex: (a b c) -> ((a 1) (b 2) (c 3))
+(define (enumerate lst)
+  (define (enumerate-aux lst n)
+    (cond
+      [(empty? lst) empty]
+      [else (cons (list (first lst) n) (enumerate-aux (rest lst) (+ n 1)))]))
+  (enumerate-aux lst 1))
 
 ; Testes
 (define ordered-productions
@@ -75,3 +96,6 @@
                )))
 
 (traces g--> ordered-productions)
+
+; corrigir redução
+; remover recursões indiretas
