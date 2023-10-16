@@ -17,8 +17,12 @@
 (define i-->
   (reduction-relation G
       (-->
-        [(order_1 ... (nonterminal_0 number_0) order_2 ... (nonterminal number_c) order_3 ...)(production_1 ... (nonterminal_0 ((t ...) ...)) production_2 ... (nonterminal (seq_0 ... (nonterminal_0  t_1 ...) seq_1 ...)) production_3 ...)] 
-       [(order_1 ... (nonterminal_0 number_0)  order_2 ... (nonterminal number_c) order_3 ...)(production_1 ... (nonterminal_0 ((t ...) ...)) production_2 ... (nonterminal (seq_0 ... (t ... t_1 ...) ... seq_1 ...)) production_3 ...)])
+        [(order_1 ... (nonterminal_0 number_0) order_2 ... (nonterminal number_c) order_3 ...)((nonterminal (seq_0 ... (nonterminal_0  t_1 ...) seq_1 ...)) production_1 ... (nonterminal_0 ((t ...) ...)) production_2 ...)] 
+        [(order_1 ... (nonterminal_0 number_0)  order_2 ... (nonterminal number_c) order_3 ...)(production_1 ... (nonterminal_0 ((t ...) ...)) production_2 ... (nonterminal (seq_0 ... (t ... t_1 ...) ... seq_1 ...)))])
+
+       (-->
+        [((nonterminal_!_0 number_0)... (nonterminal_1 number_c) order_3 ...)((nonterminal_1 ((terminal t_0 ...) ... (nonterminal_!_0  t_1 ...) ...)) production_1 ...)] 
+        [((nonterminal_!_0 number_0) ... (nonterminal_1 number_c) order_3 ...)(production_1 ... (nonterminal_1 ((terminal t_0 ...) ... (nonterminal_0  t_1 ...) ...)))] )
   ))
       
 ;; deixar recursão à esquerda mais generica
