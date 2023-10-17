@@ -17,22 +17,15 @@
 (define i-->
   (reduction-relation G
       (-->
-        [(order_1 ... (nonterminal_0 number_0) order_2 ... (nonterminal number_c) order_3 ...)((nonterminal (seq_0 ... (nonterminal_0  t_1 ...) seq_1 ...)) production_1 ... (nonterminal_0 ((t ...) ...)) production_2 ...)] 
-        [(order_1 ... (nonterminal_0 number_0)  order_2 ... (nonterminal number_c) order_3 ...)(production_1 ... (nonterminal_0 ((t ...) ...)) production_2 ... (nonterminal (seq_0 ... (t ... t_1 ...) ... seq_1 ...)))])
-
-       (-->
-        [((nonterminal_!_0 number_0)... (nonterminal_1 number_c) order_3 ...)((nonterminal_1 ((terminal t_0 ...) ... (nonterminal_!_0  t_1 ...) ...)) production_1 ...)] 
-        [((nonterminal_!_0 number_0) ... (nonterminal_1 number_c) order_3 ...)(production_1 ... (nonterminal_1 ((terminal t_0 ...) ... (nonterminal_0  t_1 ...) ...)))] )
+        [(order_1 ... (nonterminal_0 number_0) order_2 ... (nonterminal number_c) order_3 ...)(production_1 ... (nonterminal_0 ((t ...) ...)) production_2 ... (nonterminal (seq_0 ... (nonterminal_0  t_1 ...) seq_1 ...)) production_3 ...)] 
+        [(order_1 ... (nonterminal_0 number_0)  order_2 ... (nonterminal number_c) order_3 ...)(production_1 ... (nonterminal_0 ((t ...) ...)) production_2 ... (nonterminal (seq_0 ... (t ... t_1 ...) ... seq_1 ...)) production_3 ...)])
   ))
-      
-;; deixar recursão à esquerda mais generica
-;; colocar contexto
-;;; nonterminal ::= non_rec non_no_rec
-;;; non_rec ::= (nonterminal (seq ... (nonterminal seq_1 ....) seq ...))
 
-;;; v ::= (nonterminal_!_ (nonterminal_!_ seq ...))
-;;; C ::= hole (non_rec ... C production ...)
-;;; production ::
+(define-extended-language Gctx G
+  [v ::= (nonterminal_!_ (nonterminal_!_ seq ...))]
+  [C ::= hole (nonterminal_!_ ... C production ...)])
+
+(define indirect-reduction (context-closure i--> Gctx C))
 
 
 ; corrigir redução
@@ -144,4 +137,4 @@
                (B ((A) (7 2)))
                ))))
 
-(traces i--> ordered-productions)
+(traces indirect-reduction ordered-productions)
