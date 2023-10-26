@@ -18,16 +18,25 @@
 (define i-->
   (reduction-relation G
       (-->
-        [(order_1 ... nonterminal_0 (name n1 nonterminal_!_1) ... nonterminal order_3 ...)(production_1 ... (nonterminal_0 ((t ...) ...)) production_2 ...  (nonterminal (seq_0 ... (nonterminal_0  t_1 ...) ((name n2 nonterminal_!_1) t_2 ...) ...)) production ...)]
-        [(order_1 ... nonterminal_0 n1 ... nonterminal order_3 ...)(production_1 ... (nonterminal_0 ((t ...) ...)) production_2 ... (nonterminal (seq_0 ... (t ... t_1 ...) ... (n2 t_2 ...) ...)) production ...)])
+        [(order_1 ... nonterminal_0 (name n1 nonterminal_!_1) ... nonterminal order_3 ...)((nonterminal (seq_0 ... (nonterminal_0  t_1 ...) (
+          (name n2 nonterminal_!_1) t_2 ...) ...)) production_1 ... (nonterminal_0 ((t ...) ...)) production_2 ...)]
+        [(order_1 ... nonterminal_0 n1 ... nonterminal order_3 ...)(production_1 ... (nonterminal_0 ((t ...) ...)) production_2 ... (nonterminal (seq_0 ... (t ... t_1 ...) ... (n2 t_2 ...) ...)))])
+
+      (-->
+        [((name n0 nonterminal_!_0) ... nonterminal_1 order_3 ...) ((nonterminal_1 ((terminal t_0 ...) ... ((name n1 nonterminal_!_0)  t_1 ...) ...)) production_1 ...) ]
+        [(n0 ... nonterminal_1 order_3 ...)(production_1 ... (nonterminal_1 ((terminal t_0 ...) ... (n1  t_1 ...) ...)))])
   ))
 
 ; Redução para eliminar recursão à esquerda direta
 (define d-->
   (reduction-relation G
     (-->
-     [(order ...) (production ... (nonterminal ((terminal t ...) ... (nonterminal t_1 ...) seq_2 ... )) production_1 ...)] 
-     [(order ...) (concat-productions (concat-productions (production ...) (eliminate-left-recursion (new-production nonterminal ((terminal t ...) ... (nonterminal t_1 ...) seq_2 ... )) ))(production_1 ...))])
+     [(order ...) ((nonterminal ((terminal t ...) ... (nonterminal t_1 ...) seq_2 ... )) production_1 ...)] 
+     [(order ...) (concat-productions (production_1 ...) (eliminate-left-recursion (new-production nonterminal ((terminal t ...) ... (nonterminal t_1 ...) seq_2 ... ))))])
+
+     (-->
+      [(order ...) (((name n0 nonterminal_!_0) ((terminal t ...) ... ((name n1 nonterminal_!_0) t_1 ...) ... )) production_1 ...)] 
+       [(order ...) (production_1 ... (n0 ((terminal t ...) ... (n1 t_1 ...) ... )))] )
   ))
 
 ; Função que cria uma novo não terminal que produz o vazio
