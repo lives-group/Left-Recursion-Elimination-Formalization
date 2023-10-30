@@ -22,8 +22,12 @@
         [(n0 ... nonterminal_0 n1 ... nonterminal order_0 ...)(concat-productions (check-left-recursion (order-production nonterminal (seq_0 ... (t ... t_1 ...) ... (n2 t_2 ...) ...))) (production ... (nonterminal_0 ((t ...) ...)) production_0 ...))])
 
       (-->
-        [((name n0 nonterminal_!_0) ... nonterminal order ...) ((nonterminal ((terminal t ...) ... ((name n1 nonterminal_!_0)  t_1 ...) ...)) production ...) ]
-        [(n0 ... nonterminal order ...)(concat-productions (production ...) (check-left-recursion (nonterminal ((terminal t ...) ... (n1  t_1 ...) ...))))])
+        [((name n0 nonterminal_!_0) ... nonterminal order order_0 ...) ((nonterminal ((terminal t ...) ... ((name n1 nonterminal_!_0)  t_1 ...) ...)) production ...) ]
+        [(n0 ... nonterminal order order_0 ...)(concat-productions (production ...) (check-left-recursion (nonterminal ((terminal t ...) ... (n1  t_1 ...) ...))))])
+
+      (-->
+        [((name n0 nonterminal_!_0) ... nonterminal) ((nonterminal ((terminal t ...) ... ((name n1 nonterminal_!_0)  t_1 ...) ...)) production ...) ]
+        [(n0 ... nonterminal)(concat-productions (check-left-recursion (nonterminal ((terminal t ...) ... (n1  t_1 ...) ...))) (production ...))])
 
       (-->
         [((name n0 nonterminal_!_0) ...) (((name n1 nonterminal_!_0) rhs) production ...) ]
@@ -78,9 +82,18 @@
 
   [(eliminate-left-recursion ((nonterminal_new ((t_0 ...) ...)) (nonterminal ()))) 
    ((nonterminal_new ((t_0 ...) ...)))]
+   
+  [(eliminate-left-recursion ((nonterminal_new ((t_0 ...) ...)) ((name n0 nonterminal_!_0) ((terminal t ...) ... ((name n1 nonterminal_!_0) t_2 ...) ...))))
+   ((n0 (add-new-nonterminal-prodution nonterminal_new ((terminal t ...) ... (n1 t_2 ...) ... ))) (nonterminal_new ((t_0 ...) ...)))])
 
-  [(eliminate-left-recursion ((nonterminal_new ((t_0 ...) ...)) (nonterminal ((terminal t ...) ... (nonterminal_1 t_2 ...) ...))))
-   ((nonterminal_new ((t_0 ...) ...)) (nonterminal ((terminal t ... nonterminal_new) ... (nonterminal_1 t_2 ... nonterminal_new) ... )))])
+; Função que concatena uma produção com um new-nonterminal
+(define-metafunction G
+  add-new-nonterminal-prodution : t rhs -> rhs
+  [(add-new-nonterminal-prodution t_1 ((t ... t_1) (t_0 ... ) ...))
+  ((t ... t_1) (t_0 ... ) ...)]
+
+  [(add-new-nonterminal-prodution (name t0 t_!_0) ((t_0 ... (name t1 t_!_0)) (t_1 ...) ...))
+  ((t_0 ... t1 t0) (t_1 ... t0)  ...)])
 
 ; Função que unifica duas gramaticas
 (define-metafunction G
@@ -111,8 +124,6 @@
     productions)
   ) 
 )
-
-
 
 ; Função que remove elementos repetidos de uma lista
 (define (remove-duplicates lst)
