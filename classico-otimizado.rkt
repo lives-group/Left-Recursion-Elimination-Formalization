@@ -15,24 +15,28 @@
   [orders (order ...)]
   [grammar (orders productions)])
 
-; Redução que transforma recursão à esquerda indireta em recursão à esquerda direta 
+; Redução que elimina recursão à esquerda
 (define i-->
   (reduction-relation G
+      ;Caso que há recursão indireta
       (-->
         [((name n0 nonterminal_!_1) ... nonterminal_0 (name n1 nonterminal_!_1) ... nonterminal order_0 ...)((nonterminal (seq_0 ... (nonterminal_0  t_1 ...) ((name n2 nonterminal_!_1) t_2 ...) ...)) production ... (nonterminal_0 ((t ...) ...)) production_0 ...)]
         [(n0 ... nonterminal_0 n1 ... nonterminal order_0 ...)(concat-productions (check-left-recursion (order-production nonterminal (seq_0 ... (t ... t_1 ...) ... (n2 t_2 ...) ...)) (production ... (nonterminal_0 ((t ...) ...)) production_0 ...)) (production ... (nonterminal_0 ((t ...) ...)) production_0 ...))])
-
+      
+      ;Caso que não há recursão indireta
       (-->
         [((name n0 nonterminal_!_0) ... nonterminal order order_0 ...) ((nonterminal ((terminal t ...) ... ((name n1 nonterminal_!_0)  t_1 ...) ...)) production ...) ]
         [(n0 ... nonterminal order order_0 ...)(concat-productions (production ...) (check-left-recursion (nonterminal ((terminal t ...) ... (n1  t_1 ...) ...)) (production ...)))])
 
-      (-->
-        [((name n0 nonterminal_!_0) ... nonterminal) ((nonterminal ((terminal t ...) ... ((name n1 nonterminal_!_0)  t_1 ...) ...)) production ...) ]
-        [(n0 ... nonterminal)(concat-productions (check-left-recursion (nonterminal ((terminal t ...) ... (n1  t_1 ...) ...)) (production ...)) (production ...))])
-      
+      ;Caso que a produção foi criada após a eliminação da recursão à esquerda direta
       (-->
         [((name n0 nonterminal_!_0) ...) (((name n1 nonterminal_!_0) rhs) production ...) ]
         [(n0 ...)(production ... (n1 rhs))])
+
+      ;Caso que para a redução
+      (-->
+        [((name n0 nonterminal_!_0) ... nonterminal) ((nonterminal ((terminal t ...) ... ((name n1 nonterminal_!_0)  t_1 ...) ...)) production ...) ]
+        [(n0 ... nonterminal)(concat-productions (check-left-recursion (nonterminal ((terminal t ...) ... (n1  t_1 ...) ...)) (production ...)) (production ...))])
   ))
 
 ;Função para eliminar recursão à esquerda direta
@@ -42,17 +46,13 @@
     (eliminate-left-recursion (new-production nonterminal ((terminal t ...) ... (nonterminal t_1 ...) seq_2 ... ) (get-list () productions)))]
 
   [(check-left-recursion (nonterminal ((terminal t ...) ... (nonterminal_0 t_1 ...) ... )) productions)
-    ((nonterminal ((terminal t ...) ... (nonterminal_0 t_1 ...) ... )))] 
-)
+    ((nonterminal ((terminal t ...) ... (nonterminal_0 t_1 ...) ... )))])
 
 ;Função que cria uma lista de nonterminais
 (define-metafunction G
   get-list : orders productions  -> orders
-  [(get-list (nonterminal ...) ((nonterminal_0 rhs_0) (nonterminal_1 rhs_1)...))
-   (get-list (nonterminal ... nonterminal_0) ((nonterminal_1 rhs_1)...))]
+  [(get-list (nonterminal ...) ((nonterminal_0 rhs_0) (nonterminal_1 rhs_1)...)) (get-list (nonterminal ... nonterminal_0) ((nonterminal_1 rhs_1)...))]
   [(get-list ( nonterminal ...) ())(nonterminal ...)])
-
-
 
 ; Função que elimina a recursão à esquerda direta
 (define-metafunction G
@@ -81,8 +81,7 @@
    (order-production nonterminal ((terminal t ...) ... (terminal_0 t_2 ...) (nonterminal_1 t_0 ...) (nonterminal_2 t_1 ...) ... seq ...))]
 
   [(order-production nonterminal ((terminal t ...) ... (nonterminal_0 t_0 ...) ...))
-    (nonterminal (concat-rhs ((terminal t ...) ...)  (order-nonterminal nonterminal () ((nonterminal_0 t_0 ...) ...))))]
-)
+    (nonterminal (concat-rhs ((terminal t ...) ...)  (order-nonterminal nonterminal () ((nonterminal_0 t_0 ...) ...))))])
 
 ; Função que ordena os nonterminal de um rhs
 (define-metafunction G
@@ -93,10 +92,8 @@
   [(order-nonterminal (name n0 nonterminal_!_0) (seq ...)(((name n1 nonterminal_!_0) t ...) seq_1 ...))
    (order-nonterminal n0 (seq ... (n1 t ...))(seq_1 ...))]
   
-  [(order-nonterminal nonterminal rhs ())
-   rhs])
+  [(order-nonterminal nonterminal rhs ()) rhs])
    
-
 ; Função que unifica duas gramaticas
 (define-metafunction G
   concat-productions : productions productions -> productions
@@ -114,18 +111,15 @@
   (define nonterminals (remove-duplicates (map car productions)))
   (list nonterminals
     (map
-    (lambda (p)
-      (define rhs (car (cdr p)))
-      (define head (car p))
+      (lambda (p)
+        (define rhs (car (cdr p)))
+        (define head (car p))
 
-      (let ((terminal (filter (lambda (x) (or (number? (car x)) (equal? (car x) '()))) rhs))
-            (nonterminal (filter (lambda (x) (and (not (number? (car x))) (not (equal? (car x) '())) (not (equal? (car x) head)))) rhs))
-            (recursion (filter (lambda (x) (and (not (number? (car x))) (not (equal? (car x) '())) (equal? (car x) head))) rhs)))
-        (cons (car p) (list (append terminal recursion nonterminal))))
-      )
-    productions)
-  ) 
-)
+        (let ((terminal (filter (lambda (x) (or (number? (car x)) (equal? (car x) '()))) rhs))
+              (nonterminal (filter (lambda (x) (and (not (number? (car x))) (not (equal? (car x) '())) (not (equal? (car x) head)))) rhs))
+              (recursion (filter (lambda (x) (and (not (number? (car x))) (not (equal? (car x) '())) (equal? (car x) head))) rhs)))
+          (cons (car p) (list (append terminal recursion nonterminal)))))
+    productions)))
 
 ; Função que remove elementos repetidos de uma lista
 (define (remove-duplicates lst)
