@@ -7,7 +7,8 @@
   [terminal number]
   [rhs (seq ...)]
   [seq (t ...)]
-  [order nonterminal]
+  [order (nonterminal flag)]
+  [flag 0 1]
   [t nonterminal terminal]
   [production (nonterminal rhs)]
   [V variable-not-otherwise-mentioned]
@@ -15,18 +16,28 @@
   [orders (order ...)]
   [grammar (orders productions)])
 
-; Redução que transforma recursão à esquerda indireta em recursão à esquerda direta 
+; Redução que elimina recursão à esquerda
 (define i-->
   (reduction-relation G
+      ;Caso base 
       (-->
-        [((name n0 nonterminal_!_1) ... nonterminal_0 (name n1 nonterminal_!_1) ... nonterminal order_0 ...)(production ... (nonterminal_0 ((t ...) ...)) production_0 ... (nonterminal (seq_0 ... (nonterminal_0  t_1 ...) ((name n2 nonterminal_!_1) t_2 ...) ...)) production_1 ... )]
+        [((nonterminal 0) (nonterminal_1 0) ...) ((nonterminal ((terminal t ...) ... (nonterminal_2  t_1 ...) ...)) production ...) ]
 
-        [(n0 ... nonterminal_0 n1 ... nonterminal order_0 ...)(concat-productions (concat-productions (production ... (nonterminal_0 ((t ...) ...)) production_0 ...) (check-left-recursion (order-production nonterminal (seq_0 ... (t ... t_1 ...) ... (n2 t_2 ...) ...)) (concat-productions (production_1 ... ) (production ... (nonterminal_0 ((t ...) ...)) production_0 ...)))) (production_1 ...))])
+        [((nonterminal 1) (nonterminal_1 0) ...)
+        (concat-productions (check-left-recursion (nonterminal ((terminal t ...) ... (nonterminal_2 t_1 ...) ...)) (production ...)) (production ...))])
 
+      ;Caso que tem chance de recursão indireta
       (-->
-        [((name n0 nonterminal_!_0) ... nonterminal order_0 ...) (production_0 ...(nonterminal ((terminal t ...) ... ((name n1 nonterminal_!_0)  t_1 ...) ...)) production ...) ]
+        [(((name n0 nonterminal_!_1) 1) ... (nonterminal_0 1) ((name n1 nonterminal_!_1) 1) ... (nonterminal 0) order_0 ...)(production ... (nonterminal_0 ((t ...) ...)) production_0 ... (nonterminal (seq_0 ... (nonterminal_0  t_1 ...) ((name n2 nonterminal_!_1) t_2 ...) ...)) production_1 ... )]
 
-        [(n0 ... nonterminal order_0 ...)(concat-productions (production_0 ...) (concat-productions (check-left-recursion (nonterminal ((terminal t ...) ... (n1  t_1 ...) ...)) (concat-productions (production_0 ...)(production ...))) (production ...) ))])
+        [((n0 1) ... (nonterminal_0 1) (n1 1) ... (nonterminal 0) order_0 ...)(concat-productions (concat-productions (production ... (nonterminal_0 ((t ...) ...)) production_0 ...) (check-left-recursion (order-production nonterminal (seq_0 ... (t ... t_1 ...) ... (n2 t_2 ...) ...)) (concat-productions (production_1 ... ) (production ... (nonterminal_0 ((t ...) ...)) production_0 ...)))) (production_1 ...))])
+
+      ;Caso que tem chance de recursão direta
+      (-->
+        [(((name n0 nonterminal_!_0) 1) ... (nonterminal 0) order_0 ...) (production_0 ...(nonterminal ((terminal t ...) ... ((name n1 nonterminal_!_0)  t_1 ...) ...)) production ...) ]
+
+        [((n0 1) ... (nonterminal 1) order_0 ...)
+        (concat-productions (production_0 ...) (concat-productions (check-left-recursion (nonterminal ((terminal t ...) ... (n1  t_1 ...) ...)) (concat-productions (production_0 ...)(production ...))) (production ...) ))])
   ))
 
 ;Função para eliminar recursão à esquerda direta
@@ -36,17 +47,13 @@
     (eliminate-left-recursion (new-production nonterminal ((terminal t ...) ... (nonterminal t_1 ...) seq_2 ... ) (get-list () productions)))]
 
   [(check-left-recursion (nonterminal ((terminal t ...) ... (nonterminal_0 t_1 ...) ... )) productions)
-    ((nonterminal ((terminal t ...) ... (nonterminal_0 t_1 ...) ... )))] 
-)
+    ((nonterminal ((terminal t ...) ... (nonterminal_0 t_1 ...) ... )))])
 
 ;Função que cria uma lista de nonterminais
 (define-metafunction G
-  get-list : orders productions  -> orders
-  [(get-list (nonterminal ...) ((nonterminal_0 rhs_0) (nonterminal_1 rhs_1)...))
-   (get-list (nonterminal ... nonterminal_0) ((nonterminal_1 rhs_1)...))]
+  get-list : seq productions  -> seq
+  [(get-list (nonterminal ...) ((nonterminal_0 rhs_0) (nonterminal_1 rhs_1)...)) (get-list (nonterminal ... nonterminal_0) ((nonterminal_1 rhs_1)...))]
   [(get-list ( nonterminal ...) ())(nonterminal ...)])
-
-
 
 ; Função que elimina a recursão à esquerda direta
 (define-metafunction G
@@ -63,7 +70,7 @@
 
 ; Função que cria uma novo não terminal que produz o vazio
 (define-metafunction G
-  new-production : nonterminal rhs orders -> productions
+  new-production : nonterminal rhs seq -> productions
   [(new-production nonterminal ((terminal t ...) ...  (nonterminal_1 t_2 ...) ... (nonterminal t_1 ...) seq_2 ... ) (nonterminal_5 ...)) 
    ((nonterminal_new (()))(nonterminal ((terminal t ...) ... (nonterminal_1 t_2 ...) ... (nonterminal t_1 ...) seq_2 ... )))
    (where nonterminal_new ,(variable-not-in (term (nonterminal nonterminal_5 ...)) (term nonterminal) ))])
@@ -75,8 +82,7 @@
    (order-production nonterminal ((terminal t ...) ... (terminal_0 t_2 ...) (nonterminal_1 t_0 ...) (nonterminal_2 t_1 ...) ... seq ...))]
 
   [(order-production nonterminal ((terminal t ...) ... (nonterminal_0 t_0 ...) ...))
-    (nonterminal (concat-rhs ((terminal t ...) ...)  (order-nonterminal nonterminal () ((nonterminal_0 t_0 ...) ...))))]
-)
+    (nonterminal (concat-rhs ((terminal t ...) ...)  (order-nonterminal nonterminal () ((nonterminal_0 t_0 ...) ...))))])
 
 ; Função que ordena os nonterminal de um rhs
 (define-metafunction G
@@ -87,10 +93,8 @@
   [(order-nonterminal (name n0 nonterminal_!_0) (seq ...)(((name n1 nonterminal_!_0) t ...) seq_1 ...))
    (order-nonterminal n0 (seq ... (n1 t ...))(seq_1 ...))]
   
-  [(order-nonterminal nonterminal rhs ())
-   rhs])
+  [(order-nonterminal nonterminal rhs ()) rhs])
    
-
 ; Função que unifica duas gramaticas
 (define-metafunction G
   concat-productions : productions productions -> productions
@@ -105,22 +109,23 @@
 
 ; Função que ordena a gramática
 (define (order-rhs productions)
-  (define nonterminals (remove-duplicates (map car productions)))
+  (define nonterminals (add-flag (remove-duplicates (map car productions))))
   (list nonterminals
     (map
-    (lambda (p)
-      (define rhs (car (cdr p)))
-      (define head (car p))
+      (lambda (p)
+        (define rhs (car (cdr p)))
+        (define head (car p))
 
-      (let ((terminal (filter (lambda (x) (or (number? (car x)) (equal? (car x) '()))) rhs))
-            (nonterminal (filter (lambda (x) (and (not (number? (car x))) (not (equal? (car x) '())) (not (equal? (car x) head)))) rhs))
-            (recursion (filter (lambda (x) (and (not (number? (car x))) (not (equal? (car x) '())) (equal? (car x) head))) rhs)))
-        (cons (car p) (list (append terminal recursion nonterminal))))
-      )
-    productions)
-  ) 
-)
+        (let ((terminal (filter (lambda (x) (or (number? (car x)) (equal? (car x) '()))) rhs))
+              (nonterminal (filter (lambda (x) (and (not (number? (car x))) (not (equal? (car x) '())) (not (equal? (car x) head)))) rhs))
+              (recursion (filter (lambda (x) (and (not (number? (car x))) (not (equal? (car x) '())) (equal? (car x) head))) rhs)))
+          (cons (car p) (list (append terminal recursion nonterminal)))))
+    productions)))
 
+; Função que adiciona um flag 0 em cada não terminal ou seja (A 0)
+(define (add-flag nonterminals)
+  (map (lambda (x) (list x 0)) nonterminals))
+  
 ; Função que remove elementos repetidos de uma lista
 (define (remove-duplicates lst)
   (cond
@@ -154,7 +159,7 @@
 (define ordered-productions
   (order-rhs
     (unify-productions '(
-               (S ((B 2) (S 4) (2)))
+               (S ((B 2) (A 4) (2)))
                (C ((A) (7 2)))
                (B ((S 2) (B 3)))
                (A ((C A) (S 2)))
@@ -164,16 +169,18 @@
 (traces i--> ordered-productions)
 
 ;;;;; Adições
+
 ; 1
 ; fazer codigo (Racket Check) para gerar gramaticas recursivas a esquerda. 
   ; 1 verificar se gramatica não é recursiva a esquerda (direta e indireta)
-  ; 2 Gerar insumos para o teste
+  ; 2 Gerar insumos para o teste (usando racket puro, olhar repositorio)
   ; 3 Vericar a equivalencia da linguagem gerada pela a gramatica original e a gramatica resultante (Thiago)
     ; - Teste baseado em propriedades
     ; - Cobertura de código
     ; - VAI SER O ULTIMO A SER FEITO
-; 2
-; Moore
+
+; 2 (Se der tempo)
+; Robert Moore
 ; A -> abcBD | abBBA
 ; A -> abA'
 ; A' -> cBD | BBA
