@@ -14,6 +14,7 @@
   [V variable-not-otherwise-mentioned]
   [productions (production ...)]
   [orders (order ...)]
+  [bool #t #f]
   [grammar (orders productions)])
 
 ; Redução que elimina recursão à esquerda
@@ -21,24 +22,64 @@
   (reduction-relation G
       ;Caso base 
       (-->
-        [((nonterminal 0) (nonterminal_1 0) ...) ((nonterminal ((terminal t ...) ... (nonterminal_2  t_1 ...) ...)) production ...) ]
+        [((nonterminal 0) (nonterminal_1 0) ...) 
+         ((nonterminal ((terminal t ...) ... (nonterminal_2  t_1 ...) ...)) production ...) ]
 
         [((nonterminal 1) (nonterminal_1 0) ...)
-        (concat-productions (check-left-recursion (nonterminal ((terminal t ...) ... (nonterminal_2 t_1 ...) ...)) (production ...)) (production ...))])
+         (concat-productions 
+          (check-left-recursion 
+            (nonterminal ((terminal t ...) ... (nonterminal_2 t_1 ...) ...)) 
+            (production ...)) 
+          (production ...))])
 
       ;Caso que tem chance de recursão indireta
       (-->
-        [(((name n0 nonterminal_!_1) 1) ... (nonterminal_0 1) ((name n1 nonterminal_!_1) 1) ... (nonterminal 0) order_0 ...)(production ... (nonterminal_0 ((t ...) ...)) production_0 ... (nonterminal (seq_0 ... (nonterminal_0  t_1 ...) ((name n2 nonterminal_!_1) t_2 ...) ...)) production_1 ... )]
+        [(((name n0 nonterminal_!_1) 1) ... (nonterminal_0 1) ((name n1 nonterminal_!_1) 1) ... (nonterminal 0) order_0 ...) 
+         (production ... (nonterminal_0 ((t ...) ...)) production_0 ... (nonterminal (seq_0 ... (nonterminal_0  t_1 ...) ((name n2 nonterminal_!_1) t_2 ...) ...)) production_1 ... )]
 
-        [((n0 1) ... (nonterminal_0 1) (n1 1) ... (nonterminal 0) order_0 ...)(concat-productions (concat-productions (production ... (nonterminal_0 ((t ...) ...)) production_0 ...) (check-left-recursion (order-production nonterminal (seq_0 ... (t ... t_1 ...) ... (n2 t_2 ...) ...)) (concat-productions (production_1 ... ) (production ... (nonterminal_0 ((t ...) ...)) production_0 ...)))) (production_1 ...))])
+        [((n0 1) ... (nonterminal_0 1) (n1 1) ... (nonterminal 0) order_0 ...)
+         (concat-productions 
+            (concat-productions 
+              (production ... (nonterminal_0 ((t ...) ...)) production_0 ...) 
+              (check-left-recursion 
+                (order-production nonterminal (seq_0 ... (t ... t_1 ...) ... (n2 t_2 ...) ...)) 
+                (concat-productions 
+                  (production_1 ... ) 
+                  (production ... (nonterminal_0 ((t ...) ...)) production_0 ...)))) 
+            (production_1 ...))])
 
       ;Caso que tem chance de recursão direta
       (-->
-        [(((name n0 nonterminal_!_0) 1) ... (nonterminal 0) order_0 ...) (production_0 ...(nonterminal ((terminal t ...) ... ((name n1 nonterminal_!_0)  t_1 ...) ...)) production ...) ]
-
-        [((n0 1) ... (nonterminal 1) order_0 ...)
-        (concat-productions (production_0 ...) (concat-productions (check-left-recursion (nonterminal ((terminal t ...) ... (n1  t_1 ...) ...)) (concat-productions (production_0 ...)(production ...))) (production ...) ))])
+        [((nonterminal_0 1) (nonterminal_1 1) ... (nonterminal 0) order ...)
+          (production_0 ...(nonterminal rhs) production ...)]
+          
+        [((nonterminal_0 1) (nonterminal_1 1) ... (nonterminal 1) order ...)
+        (concat-productions 
+          (production_0 ...) 
+          (concat-productions 
+            (check-left-recursion 
+              (nonterminal rhs)
+              (concat-productions 
+                (production_0 ...)
+                (production ...))) 
+            (production ...) ))]
+          (where 1 (check-difference ((nonterminal_0 1) (nonterminal_1 1) ...) rhs))
+            
+            )
   ))
+
+; Função que verifica se não há nenhum nonterminal de order contido no primeiro termo de um rhs
+(define-metafunction G
+  check-difference : orders rhs -> flag
+  [(check-difference orders rhs)
+   (if (andmap (lambda (order)
+                 (andmap (lambda (seq)
+                           (not (equal? (car order) (car seq))))
+                         rhs))
+               orders)
+       1
+       0)])
+
 
 ;Função para eliminar recursão à esquerda direta
 (define-metafunction G
