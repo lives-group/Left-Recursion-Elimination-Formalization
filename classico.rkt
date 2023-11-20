@@ -14,13 +14,12 @@
   [V variable-not-otherwise-mentioned]
   [productions (production ...)]
   [orders (order ...)]
-  [bool #t #f]
   [grammar (orders productions)])
 
 ; Redução que elimina recursão à esquerda
 (define i-->
   (reduction-relation G
-      ;Caso base 
+      ; Caso base 
       (-->
         [((nonterminal 0) (nonterminal_1 0) ...) 
          ((nonterminal ((terminal t ...) ... (nonterminal_2  t_1 ...) ...)) production ...) ]
@@ -32,7 +31,7 @@
             (production ...)) 
           (production ...))])
 
-      ;Caso que tem chance de recursão indireta
+      ; Caso que tem chance de recursão indireta
       (-->
         [(((name n0 nonterminal_!_1) 1) ... (nonterminal_0 1) ((name n1 nonterminal_!_1) 1) ... (nonterminal 0) order_0 ...) 
          (production ... (nonterminal_0 ((t ...) ...)) production_0 ... (nonterminal (seq_0 ... (nonterminal_0  t_1 ...) ((name n2 nonterminal_!_1) t_2 ...) ...)) production_1 ... )]
@@ -48,40 +47,35 @@
                   (production ... (nonterminal_0 ((t ...) ...)) production_0 ...)))) 
             (production_1 ...))])
 
-      ;Caso que tem chance de recursão direta
+      ; Caso que tem chance de recursão direta
       (-->
         [((nonterminal_0 1) (nonterminal_1 1) ... (nonterminal 0) order ...)
-          (production_0 ...(nonterminal rhs) production ...)]
+          (production_0 ...(nonterminal ((terminal t_0 ... ) ... (nonterminal_2 t_1 ...) ...)) production ...)]
           
         [((nonterminal_0 1) (nonterminal_1 1) ... (nonterminal 1) order ...)
         (concat-productions 
           (production_0 ...) 
           (concat-productions 
             (check-left-recursion 
-              (nonterminal rhs)
+              (nonterminal ((terminal t_0 ... ) ... (nonterminal_2 t_1 ...) ...))
               (concat-productions 
                 (production_0 ...)
                 (production ...))) 
             (production ...) ))]
-          (where 1 (check-difference ((nonterminal_0 1) (nonterminal_1 1) ...) rhs))
-            
-            )
+          (where 1 (check-difference ((nonterminal_0 1) (nonterminal_1 1) ...) ((nonterminal_2 t_1 ...) ...))))
   ))
 
 ; Função que verifica se não há nenhum nonterminal de order contido no primeiro termo de um rhs
 (define-metafunction G
   check-difference : orders rhs -> flag
-  [(check-difference orders rhs)
-   (if (andmap (lambda (order)
-                 (andmap (lambda (seq)
-                           (not (equal? (car order) (car seq))))
-                         rhs))
-               orders)
-       1
-       0)])
+  [(check-difference (((name n0 nonterminal_!_1) _) ...) ((nonterminal_!_1 t ...) (nonterminal_2 t_2 ...) ...))
+   (check-difference ((n0 1) ...) ((nonterminal_2 t_2 ...) ...))]
 
+  [(check-difference orders ()) 1]
 
-;Função para eliminar recursão à esquerda direta
+  [(check-difference (order ... (nonterminal flag_1) order_1 ... ) (seq ... (nonterminal t ...) seq_1 ... )) 0])
+
+; Função para eliminar recursão à esquerda direta
 (define-metafunction G
   check-left-recursion : production productions -> productions
   [(check-left-recursion (nonterminal ((terminal t ...) ... (nonterminal t_1 ...) seq_2 ... )) productions)
@@ -90,7 +84,7 @@
   [(check-left-recursion (nonterminal ((terminal t ...) ... (nonterminal_0 t_1 ...) ... )) productions)
     ((nonterminal ((terminal t ...) ... (nonterminal_0 t_1 ...) ... )))])
 
-;Função que cria uma lista de nonterminais
+; Função que cria uma lista de nonterminais
 (define-metafunction G
   get-list : seq productions  -> seq
   [(get-list (nonterminal ...) ((nonterminal_0 rhs_0) (nonterminal_1 rhs_1)...)) (get-list (nonterminal ... nonterminal_0) ((nonterminal_1 rhs_1)...))]
@@ -116,7 +110,7 @@
    ((nonterminal_new (()))(nonterminal ((terminal t ...) ... (nonterminal_1 t_2 ...) ... (nonterminal t_1 ...) seq_2 ... )))
    (where nonterminal_new ,(variable-not-in (term (nonterminal nonterminal_5 ...)) (term nonterminal) ))])
 
-;Função que ordena uma produção
+; Função que ordena uma produção
 (define-metafunction G
   order-production : nonterminal rhs -> production
   [(order-production nonterminal ((terminal t ...) ... (nonterminal_1 t_0 ...) (nonterminal_2 t_1 ...) ... (terminal_0 t_2 ...) seq ...))
