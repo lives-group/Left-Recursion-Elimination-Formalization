@@ -40,11 +40,7 @@
          (concat-productions 
             (concat-productions 
               (production ... (nonterminal_0 ((t ...) ...)) production_0 ...) 
-              (check-left-recursion 
-                (order-production nonterminal (seq_0 ... (t ... t_1 ...) ... (n2 t_2 ...) ...)) 
-                (concat-productions 
-                  (production_1 ... ) 
-                  (production ... (nonterminal_0 ((t ...) ...)) production_0 ...)))) 
+              ((order-production nonterminal (seq_0 ... (t ... t_1 ...) ... (n2 t_2 ...) ...))))
             (production_1 ...))])
 
       ; Caso que tem chance de recursão direta
