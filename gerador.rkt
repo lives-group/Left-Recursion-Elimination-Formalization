@@ -1,13 +1,5 @@
 #lang racket
 
-; Gerador de gramáticas recursivas à esquerda, como o exemplo abaixo:
-;(
-;  (S ((B 2) (A 4) (2)))
-;  (C ((A) (S 2)))
-;  (B ((S 2) (B 3)))
-;  (A ((C A) (S 2)))
-; )
-
 ; Parâmetros de entrada
 (define num-terminals 8)
 (define num-nonterminals 4)
