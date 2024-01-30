@@ -1,5 +1,11 @@
 #lang racket
 
+(require rackcheck)
+(provide (all-defined-out))
+
+(require redex
+         "classico.rkt")
+
 ; Parâmetros de entrada
 (define num-terminals 8)
 (define num-nonterminals 4)
@@ -18,7 +24,7 @@
     (let loop ((n 1) (acc '()))
         (if (> n num-nonterminals)
             acc
-            (loop (+ n 1) (cons (integer->char (+ (modulo (+ n 1) 26) (if (= n 1) 81 62))) acc)))))
+             (loop (+ n 1) (cons (list-ref '(S A B C D E F G H I J K L M N O P Q R T U V W X Y Z) (- n 1)) acc)))))
 
 ; Sorteia o tamanho do rhs
 (define (get-rhs-size)
@@ -39,7 +45,7 @@
         (list-ref terminals (random num-terminals))
         (list-ref nonterminals (random num-nonterminals))))
 
-; Sorteia um nonteminal que esteja depois do não-terminal passado como parâmetro na lista de não-terminais,
+; Sorteia um nonteminal que esteja depois do não-terminal passado como parâmetro na lista de não-terminais
 (define (sort-nonterminal nonterminal nonterminals)
   (define index (position nonterminal nonterminals 0))
   (if (zero? index)
@@ -92,8 +98,7 @@
       (get-term terminals nonterminals)))
 
 
-; --- TESTES ---
-
+; --- Debug ---
 
 ; Imprime a gramática
 (define (print-grammar grammar)
@@ -104,10 +109,14 @@
         (displayln (list-ref grammar n))
         (loop (+ n 1)))
       (displayln ")"))))
+; -------------
 
-(define terminals (generate-terminals))
-(define nonterminals (generate-nonterminals))
-(displayln nonterminals)
+(define ordered-productions
+  (order-rhs
+    (unify-productions (generate-grammar (generate-terminals) (generate-nonterminals)))))
 
+(traces i--> ordered-productions)
 
-(print-grammar (generate-grammar terminals nonterminals))
+;;; (define terminals (generate-terminals))
+;;; (define nonterminals (generate-nonterminals))
+;;; (print-grammar (generate-grammar terminals nonterminals))

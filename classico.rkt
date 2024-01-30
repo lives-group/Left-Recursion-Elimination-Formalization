@@ -1,6 +1,8 @@
 #lang racket
 (require redex)
 
+(provide (all-defined-out))
+
 ; Definição da gramática
 (define-language G
   [nonterminal V]
@@ -182,15 +184,3 @@
       lst2
       (cons (car lst1) (concat-list (cdr lst1) lst2))))
 
-; Testes
-(define ordered-productions
-  (order-rhs
-    (unify-productions '(
-               (S ((B 2) (A 4) (2)))
-               (C ((A) (S 2)))
-               (B ((S 2) (B 3)))
-               (A ((C A) (S 2)))
-               (B ((A) (7 2)))
-               ))))
-
-(traces i--> ordered-productions)
