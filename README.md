@@ -5,7 +5,7 @@ Formalização dos algoritmos de eliminação de recursão à esquerda
 
 1. Fazer código para gerar gramáticas recursivas à esquerda.
     - ~~Gerar insumos para o teste (usando racket puro, olhar repositório)~~
-    - Verificar se a gramática não é recursiva à esquerda (direta e indireta) (rackcheck)
+    - ~~Verificar se a gramática não é recursiva à esquerda (direta e indireta) (rackcheck)~~
     - Escrever 
     - Verificar a equivalência da linguagem gerada pela a gramática original e a gramática resultante (Thiago)
         - Usar a derivada para gerar a entrada da gramática 1 (com recursão à esquerda)
