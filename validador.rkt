@@ -1,37 +1,41 @@
 #lang racket
 
-(require rackcheck)
+(provide (all-defined-out))
 
-; Parâmetros de entrada
-(define num-terminals 8)
-(define num-nonterminals 4)
-(define max-rhs 3)
-(define max-seq 4)
+(require redex
+         rackunit
+         rackcheck
+         "classico.rkt"
+         "gerador.rkt")
+         
+(module+ test
 
+  ; Gera os terminais
+  (define gen:terminals
+    (gen:let ([num-terminals (gen:integer-in min-terminals max-terminals)])
+    (generate-terminals num-terminals)))
 
-; Gera os terminais
-(define gen:terminals (gen:list (gen:integer-in 5 100) #:max-length num-terminals))
+  ; Gera os não-terminais
+  (define gen:nonterminals
+    (gen:let ([num-nonterminals (gen:integer-in min-nonterminals max-nonterminals)])
+    (generate-nonterminals num-nonterminals)))
 
-; Gera uma lista de não-terminais
-(define gen:non-terminals
-    (gen:list
-        (gen:one-of
-            (list 'S 'A 'B 'C 'D 'E 'F 'G 'H 'I 'J 'K 'L 'M 'N 'O 'P 'Q 'R 'T 'U 'V 'W 'X 'Y 'Z)) #:max-length num-nonterminals))
+  ; Gera a gramática
+  (define gen:grammar
+    (gen:let ([terminals gen:terminals]
+              [nonterminals gen:nonterminals])
+    (generate-grammar terminals nonterminals)))
+  
+  ; Unifica as produções geradas por um mesmo não-terminal
+  (define gen:grammar-unified
+    (gen:let ([grammar gen:grammar])
+    (unify-productions grammar)))
+  
+  ; Ordena o rhs das produções
+  (define gen:grammar-ordered
+    (gen:let ([grammar gen:grammar-unified])
+    (order-rhs grammar)))
 
-; Sorteia um número entre 1 e 3 
-; (1 = recursão direta, 2 = chance de recursão indireta, 3 = sorteio de terminal ou não-terminal)
-(define gen:rule-type (gen:one-of '(1 2 3)))
-
-(sample gen:terminals 5)
-
-; Sorteia um terminal ou não-terminal
-(define gen:rule-element (gen:one-of (list gen:terminals gen:non-terminals)))
-
-; Sorteia um nonteminal que esteja depois do não-terminal da lista de não-terminais
-(define gen:sort-non-terminal 
-    (lambda (non-terminal non-terminals)
-        (gen:one-of
-            (filter
-                (lambda (x) (not (eq? x non-terminal)))
-                non-terminals))))
-
+  (check-property
+    (property ([g1 gen:grammar-ordered])
+      (check-true (not (empty? (apply-reduction-relation* i--> g1)))))))

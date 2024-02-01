@@ -1,28 +1,31 @@
 #lang racket
 
-(require rackcheck)
 (provide (all-defined-out))
 
 (require redex
+         rackunit
+         rackcheck
          "classico.rkt")
 
 ; Parâmetros de entrada
-(define num-terminals 8)
-(define num-nonterminals 4)
-(define max-rhs 3)
-(define max-seq 4)
+(define max-terminals 6)
+(define min-terminals 3)
+(define max-nonterminals 8)
+(define min-nonterminals 3)
+(define max-rhs 4)
+(define max-seq 3)
 
 ; Gera os terminais
-(define (generate-terminals)
+(define (generate-terminals size)
   (let loop ((n 1) (acc '()))
-    (if (> n num-terminals)
+    (if (> n size)
         acc
         (loop (+ n 1) (cons n acc)))))
 
 ; Gera os não-terminais
-(define (generate-nonterminals)
+(define (generate-nonterminals size)
     (let loop ((n 1) (acc '()))
-        (if (> n num-nonterminals)
+        (if (> n size)
             acc
              (loop (+ n 1) (cons (list-ref '(S A B C D E F G H I J K L M N O P Q R T U V W X Y Z) (- n 1)) acc)))))
 
@@ -42,8 +45,8 @@
 ; Sorteia um terminal ou não-terminal
 (define (get-term terminals nonterminals)
     (if (< (random 2) 1)
-        (list-ref terminals (random num-terminals))
-        (list-ref nonterminals (random num-nonterminals))))
+        (list-ref terminals (random (length terminals)))
+        (list-ref nonterminals (random (length nonterminals)))))
 
 ; Sorteia um nonteminal que esteja depois do não-terminal passado como parâmetro na lista de não-terminais
 (define (sort-nonterminal nonterminal nonterminals)
@@ -65,7 +68,7 @@
 ; Gera uma gramática
 (define (generate-grammar terminals nonterminals)
     (let loop ((n 0) (acc '()))
-        (if (= n num-nonterminals)
+        (if (= n (length nonterminals))
             acc
             (loop (+ n 1) (cons (generate-production (list-ref nonterminals n) terminals nonterminals) acc)))))       
 
@@ -97,7 +100,6 @@
           ((= seq-type 3) (get-term terminals nonterminals)))
       (get-term terminals nonterminals)))
 
-
 ; --- Debug ---
 
 ; Imprime a gramática
@@ -109,14 +111,17 @@
         (displayln (list-ref grammar n))
         (loop (+ n 1)))
       (displayln ")"))))
-; -------------
-
-(define ordered-productions
-  (order-rhs
-    (unify-productions (generate-grammar (generate-terminals) (generate-nonterminals)))))
-
-(traces i--> ordered-productions)
 
 ;;; (define terminals (generate-terminals))
 ;;; (define nonterminals (generate-nonterminals))
 ;;; (print-grammar (generate-grammar terminals nonterminals))
+
+; --- Chamada do algoritmo clássico ---
+
+;;; (define ordered-productions
+;;;   (order-rhs
+;;;     (unify-productions (generate-grammar (generate-terminals) (generate-nonterminals)))))
+
+;;; (traces i--> ordered-productions)
+
+; ------ Fim de Debug ------
