@@ -7,7 +7,7 @@
          rackcheck
          "classico.rkt"
          "gerador.rkt")
-         
+
 (module+ test
 
   ; Gera os terminais
@@ -36,6 +36,47 @@
     (gen:let ([grammar gen:grammar-unified])
     (order-rhs grammar)))
 
-  (check-property
+ (check-property
     (property ([g1 gen:grammar-ordered])
-      (check-true (not (empty? (apply-reduction-relation* i--> g1)))))))
+      ; Verifica se a gramática gerada possui produções recursivas à esquerda
+      (check-equal? (has-left-recursion? g1) #t)
+      ; Verifica se as recursões à esquerda foram removidas
+      (check-equal? (has-left-recursion? (apply-reduction-relation* i--> g1)) #f))))
+
+
+;---- Funções auxiliares ----
+; Verifica se uma produção é recursiva à esquerda  de forma direta
+(define (is-left-recursive-d term rhs)
+    (ormap
+        (lambda (seq)
+            (if (eq? seq '()) #f
+                (if (list? seq)
+                    (if (equal? (car seq) term) #t #f)
+                    (if (equal? seq term) #t #f))))
+        rhs))
+
+; Verifica se uma produção possui possibilidade de recursão à esquerda indireta
+(define (is-left-recursive-i order rhs)
+    (ormap
+        (lambda (seq)
+            (if (eq? seq '()) #f
+                (ormap
+                    (lambda (term)
+                        (define head-ord (car term))
+                        (if (list? seq)
+                            (if (equal? (car seq) head-ord) #t #f)
+                            (if (equal? seq head-ord) #t #f)))
+                    order)))
+        rhs))
+
+; Verifica se na gramática existe alguma produção recursiva à esquerda
+(define (has-left-recursion? grammar)
+    (if (eq? (cdr grammar) '()) #f 
+        (ormap
+            (lambda (prd)
+            (define head (car prd))
+                (define rhs (car(cdr prd)))
+                (is-left-recursive-d head rhs)
+                (is-left-recursive-i (car grammar) rhs))
+            (car (cdr grammar)))))
+
