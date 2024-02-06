@@ -13,6 +13,7 @@ Formalização dos algoritmos de eliminação de recursão à esquerda
         - Gerar um palavra da gramática 2 e verificar se ela pertence a linguagem da gramática 1
         - Teste baseado em propriedades
         - Cobertura de código (VAI SER O ÚLTIMO A SER FEITO)
+        - corrigir a descrição de alguns commits
 
 2. (Se der tempo)
     - Robert Moore
