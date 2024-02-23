@@ -3,14 +3,12 @@
 (provide (all-defined-out))
 
 (require redex
-         rackunit
-         rackcheck
          "classico.rkt")
 
 ; Parâmetros de entrada
-(define max-terminals 6)
+(define max-terminals 50)
 (define min-terminals 3)
-(define max-nonterminals 8)
+(define max-nonterminals 25)
 (define min-nonterminals 3)
 (define max-rhs 4)
 (define max-seq 3)

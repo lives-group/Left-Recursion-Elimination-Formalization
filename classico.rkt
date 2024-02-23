@@ -31,7 +31,7 @@
           (check-left-recursion 
             (nonterminal ((terminal t ...) ... (nonterminal_2 t_1 ...) ...)) 
             (production ...)) 
-          (production ...))])
+          (production ...))] "Caso base")
 
       ; Caso que tem chance de recursão indireta
       (-->
@@ -41,7 +41,7 @@
         [((n0 1) ... (nonterminal_0 1) (n1 1) ... (nonterminal 0) order_0 ...)
          (concat-productions 
             (production ... (nonterminal_0 ((t ...) ...)) production_0 ... (order-production nonterminal (seq_0 ... (t ... t_1 ...) ... (n2 t_2 ...) ...)))
-            (production_1 ...))])
+            (production_1 ...))] "Caso que tem chance de recursão indireta")
 
       ; Caso que tem chance de recursão direta
       (-->
@@ -56,8 +56,8 @@
               (nonterminal ((terminal t_0 ... ) ... (nonterminal_2 t_1 ...) ...))
               (production_0 ... production ...))
             (production ...) ))]
-          (where 1 (check-difference ((nonterminal_0 1) (nonterminal_1 1) ...) ((nonterminal_2 t_1 ...) ...))))
-  ))
+          (where 1 (check-difference ((nonterminal_0 1) (nonterminal_1 1) ...) ((nonterminal_2 t_1 ...) ...))) "Caso que tem chance de recursão direta"
+  )))
 
 ; Função que verifica se não há nenhum nonterminal de order contido no primeiro termo de um rhs
 (define-metafunction G
@@ -184,3 +184,16 @@
       lst2
       (cons (car lst1) (concat-list (cdr lst1) lst2))))
 
+
+; Exemplo de uso
+;;; (define ordered-productions
+;;;   (order-rhs
+;;;     (unify-productions '(
+;;;                (S ((B 2) (A 4) (2)))
+;;;                (C ((A) (S 2)))
+;;;                (B ((S 2) (B 3)))
+;;;                (A ((C A) (S 2)))
+;;;                (B ((A) (7 2)))
+;;;                ))))
+
+;;; (traces i--> ordered-productions)

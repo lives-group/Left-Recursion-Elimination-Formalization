@@ -36,8 +36,9 @@
     (gen:let ([grammar gen:grammar-unified])
     (order-rhs grammar)))
 
- (check-property
-    (property ([g1 gen:grammar-ordered])
+ (check-property (make-config #:tests 50
+                              #:deadline (* (+ (current-inexact-milliseconds) 3600000) 24))
+    (property recursaoRemovida ([g1 gen:grammar-ordered])
       ; Verifica se a gramática gerada possui produções recursivas à esquerda
       (check-equal? (has-left-recursion? g1) #t)
       ; Verifica se as recursões à esquerda foram removidas
