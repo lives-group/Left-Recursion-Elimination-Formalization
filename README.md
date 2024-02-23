@@ -15,6 +15,7 @@ Formalização dos algoritmos de eliminação de recursão à esquerda
          - Testar palavras que não pertencem a linguagem da gramática 2 e verificar se elas não pertencem a linguagem da gramática 1
         - Teste baseado em propriedades
         - Cobertura de código (VAI SER O ÚLTIMO A SER FEITO)
+        - corrigir a descrição de alguns commits
 
 2. (Se der tempo)
     - Robert Moore
