@@ -36,12 +36,12 @@
       ; Caso que tem chance de recursão indireta
       (-->
         [(((name n0 nonterminal_!_1) 1) ... (nonterminal_0 1) ((name n1 nonterminal_!_1) 1) ... (nonterminal 0) order_0 ...) 
-         (production ... (nonterminal_0 ((t ...) ...)) production_0 ... (nonterminal ((terminal t_0 ... ) ... (nonterminal_2 t_1 ...) ... (nonterminal_0  t_1 ...) seq_1 ...)) production_1 ... )]
+         (production ... (nonterminal_0 ((t ...) ...)) production_0 ... (nonterminal ((terminal t_0 ... ) ... (nonterminal_2 t_2 ...) ... (nonterminal_0  t_1 ...) seq_1 ...)) production_1 ... )]
 
         [((n0 1) ... (nonterminal_0 1) (n1 1) ... (nonterminal 0) order_0 ...)
          (concat-productions 
-            (production ... (nonterminal_0 ((t ...) ...)) production_0 ... (order-production nonterminal ((terminal t_0 ... ) ... (nonterminal_2 t_1 ...) ... (t ... t_1 ...) ... seq_1 ...)))
-            (production_1 ...))] (where 1 (check-difference ((n0 1) ... (nonterminal_0 1) (n1 1) ...) ((nonterminal_2 t_1 ...) ...))) "Caso que tem chance de recursão indireta")
+            (production ... (nonterminal_0 ((t ...) ...)) production_0 ... (order-production nonterminal ((terminal t_0 ... ) ... (nonterminal_2 t_2 ...) ... (t ... t_1 ...) ... seq_1 ...)))
+            (production_1 ...))] (where 1 (check-difference ((n0 1) ... (nonterminal_0 1) (n1 1) ...) ((nonterminal_2 t_2 ...) ...))) "Caso que tem chance de recursão indireta")
 
       ; Caso que tem chance de recursão direta
       (-->
