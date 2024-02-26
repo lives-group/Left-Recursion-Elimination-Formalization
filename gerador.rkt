@@ -6,9 +6,9 @@
          "classico.rkt")
 
 ; Parâmetros de entrada
-(define max-terminals 50)
-(define min-terminals 3)
-(define max-nonterminals 26) ; O valor máximo de não-terminais é 26, pois usamos letras do alfabeto
+(define max-terminals 5)
+(define min-terminals 2)
+(define max-nonterminals 7) ; O valor máximo de não-terminais é 26, pois usamos letras do alfabeto
 (define min-nonterminals 3)
 (define max-rhs 4)
 (define max-seq 3)
@@ -87,16 +87,24 @@
         (if (= n seq-size)
             acc
             (loop (+ n 1) 
-              (cons (generate-seq-item nonterminal terminals nonterminals n) acc)))))
+              (cons (generate-seq-item nonterminal terminals nonterminals n seq-size) acc)))))
 
 ; Gera um item da sequência
-(define (generate-seq-item nonterminal terminals nonterminals index)
+(define (generate-seq-item nonterminal terminals nonterminals index seq-size)
   (define seq-type (get-seq-type))
+  
+  (if (= seq-size 1)
+    (if (zero? index)
+        (list-ref terminals (random (length terminals)))
+        (if (< (random 2) 1)
+          (list-ref terminals (random (length terminals)))
+          (sort-nonterminal nonterminal nonterminals)))
+
     (if (zero? index)
         (cond ((= seq-type 1) nonterminal)
           ((= seq-type 2) (sort-nonterminal nonterminal nonterminals))
           ((= seq-type 3) (get-term terminals nonterminals)))
-      (get-term terminals nonterminals)))
+        (get-term terminals nonterminals))))
 
 ; --- Debug ---
 

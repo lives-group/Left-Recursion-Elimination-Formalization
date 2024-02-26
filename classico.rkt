@@ -56,8 +56,16 @@
               (nonterminal ((terminal t_0 ... ) ... (nonterminal_2 t_1 ...) ...))
               (production_0 ... production ...))
             (production ...) ))]
-          (where 1 (check-difference ((nonterminal_0 1) (nonterminal_1 1) ...) ((nonterminal_2 t_1 ...) ...))) "Caso que tem chance de recursão direta"
-  )))
+          (where 1 (check-difference ((nonterminal_0 1) (nonterminal_1 1) ...) ((nonterminal_2 t_1 ...) ...))) "Caso que tem chance de recursão direta")
+
+      ; Caso que não tem recursão
+      (-->
+        [((nonterminal_0 1) ... (nonterminal 1) (nonterminal_1 1) ...)
+         (production ... (nonterminal ()) production_0 ...)]
+         
+        [((nonterminal_0 1) ... (nonterminal_1 1) ...)
+         (production ...  production_0 ...)])
+  ))
 
 ; Função que verifica se não há nenhum nonterminal de order contido no primeiro termo de um rhs
 (define-metafunction G
@@ -88,11 +96,14 @@
 (define-metafunction G
   eliminate-left-recursion : productions -> productions
 
-  [(eliminate-left-recursion ((nonterminal_new ((t_0 ...) ...)) (nonterminal ((terminal t ...) ... (nonterminal t_1 ...) seq_2 ... ))))
-   (eliminate-left-recursion ((nonterminal_new  ((t_0 ...) ... (t_1 ... nonterminal_new))) (nonterminal ((terminal t ...) ... seq_2 ... ))))]
+  [(eliminate-left-recursion ((nonterminal_new ((t_0 ...) ...)) (nonterminal ((terminal t ...) ... (nonterminal t_1 t_2 ...) seq_2 ... ))))
+   (eliminate-left-recursion ((nonterminal_new  ((t_0 ...) ... (t_1 t_2 ... nonterminal_new))) (nonterminal ((terminal t ...) ... seq_2 ... ))))]
 
-  [(eliminate-left-recursion ((nonterminal_new ((t_0 ...) ...)) (nonterminal ()))) 
-   ((nonterminal_new ((t_0 ...) ...)))]
+  [(eliminate-left-recursion ((nonterminal_new ((t_0 ...) ...)) (nonterminal ((terminal t ...) ... (nonterminal) seq_2 ... ))))
+   (eliminate-left-recursion ((nonterminal_new  ((t_0 ...) ...)) (nonterminal ((terminal t ...) ... seq_2 ... ))))]
+
+  ;;; [(eliminate-left-recursion ((nonterminal_new ((t_0 ...) ...)) (nonterminal ()))) 
+  ;;;  ((nonterminal_new ((t_0 ...) ...)))]
    
   [(eliminate-left-recursion ((nonterminal_new ((t_0 ...) ...)) (nonterminal ((terminal t ...) ... (nonterminal_1 t_2 ...) ...))))
    ((nonterminal_new ((t_0 ...) ...)) (nonterminal ((terminal t ... nonterminal_new) ... (nonterminal_1 t_2 ... nonterminal_new) ... )))])
