@@ -7,8 +7,8 @@
 
 ; Parâmetros de entrada
 (define max-terminals 5)
-(define min-terminals 2)
-(define max-nonterminals 7) ; O valor máximo de não-terminais é 26, pois usamos letras do alfabeto
+(define min-terminals 3)
+(define max-nonterminals 5) ; O valor máximo de não-terminais é 26, pois usamos letras do alfabeto
 (define min-nonterminals 3)
 (define max-rhs 4)
 (define max-seq 3)

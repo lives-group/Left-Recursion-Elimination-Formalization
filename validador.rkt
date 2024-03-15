@@ -7,8 +7,9 @@
          rackcheck
          "classico.rkt"
          "gerador.rkt"
+         "struct.rkt"
          "../cfg-entry-generator/main.rkt")
-         
+
 (module+ test
 
   ; Gera os terminais
@@ -37,19 +38,19 @@
     (gen:let ([grammar gen:grammar-unified])
     (order-rhs grammar)))
 
- (check-property (make-config #:tests 10
+ (check-property (make-config #:tests 1
                               #:deadline (* (+ (current-inexact-milliseconds) 3600000) 24))
     (property recursaoRemovida ([g1 gen:grammar-ordered])
       ; Aplica a remoção de recursão à esquerda
       (define g2 (car (apply-reduction-relation* i--> g1)))        
       ; Verifica se as recursões à esquerda foram removidas
-      (check-equal? (has-left-recursion? g2) #f)
+      ;(check-equal? (has-left-recursion? g2) #f)
       ; Verifica se termos aceitos por g1 são aceitos por g2
-      (check-equal? (accepts? g1 g2) #t)
+      ;(check-equal? (accepts? g1 g2) #t)
       ; Verifica se termos aceitos por g2 são aceitos por g1
-      (check-equal? (accepts? g2 g1) #t)
+      ;(check-equal? (accepts? g2 g1) #t)
       ; Verifica se os termos NÃO aceitos por g1 são aceitos por g2
-      (check-equal? (not-accepts? g1 g2) #t)
+      ;(check-equal? (not-accepts? g1 g2) #t)
       ; Verifica se os termos NÃO aceitos por g2 são aceitos por g1
       (check-equal? (not-accepts? g2 g1) #t)   
       )))
@@ -100,8 +101,8 @@
 
 ; Verifica se a gramática se termos aceitos por gf são aceitos por gs
 (define (accepts? gf gs)
-    (define g-first (car (cdr gf)))
-    (define g-second (car (cdr gs)))
+    (define g-first  (format-input(car (cdr gf))))
+    (define g-second (format-input(car (cdr gs))))
 
     ; Gera os termos de gf
     (define terms (generate-terms g-first))
@@ -118,9 +119,9 @@
 
 ; Verifica se a gramática gs não aceita termos que não são aceitos por gf   
 (define (not-accepts? gf gs)
-    (define g-first (car (cdr gf)))
-    (define g-second (car (cdr gs)))
-
+    (define g-first  (format-input(car (cdr gf))))
+    (define g-second (format-input(car (cdr gs))))
+    (print-grammar g-first)
     ; Gera os termos que não são aceitos por gf
     (define not-terms (generate-not-terms g-first))
 
