@@ -85,7 +85,7 @@
     (define seq-size (get-seq-size))
     (let loop ((n 0) (acc '()))
         (if (= n seq-size)
-            acc
+             (append acc (list (get-term terminals terminals)))
             (loop (+ n 1) 
               (cons (generate-seq-item nonterminal terminals nonterminals n seq-size) acc)))))
 
@@ -118,16 +118,16 @@
         (loop (+ n 1)))
       (displayln ")"))))
 
-;;; (define terminals (generate-terminals))
-;;; (define nonterminals (generate-nonterminals))
-;;; (print-grammar (generate-grammar terminals nonterminals))
+;(define terminals (generate-terminals 4))
+;(define nonterminals (generate-nonterminals 3))
+;(define teste (generate-grammar terminals nonterminals))
+;(print-grammar teste)
 
 ; --- Chamada do algoritmo clássico ---
+#;(define ordered-productions
+ (order-rhs
+     (unify-productions teste)))
 
-;;; (define ordered-productions
-;;;   (order-rhs
-;;;     (unify-productions (generate-grammar (generate-terminals) (generate-nonterminals)))))
-
-;;; (traces i--> ordered-productions)
+ ;(traces i--> ordered-productions)
 
 ; ------ Fim de Debug ------

@@ -6,8 +6,9 @@
          rackunit
          rackcheck
          "classico.rkt"
-         "gerador.rkt")
-
+         "gerador.rkt"
+         "../cfg-entry-generator/main.rkt")
+         
 (module+ test
 
   ; Gera os terminais
@@ -48,7 +49,9 @@
       ; Verifica se termos aceitos por g2 são aceitos por g1
       (check-equal? (accepts? g2 g1) #t)
       ; Verifica se os termos NÃO aceitos por g1 são aceitos por g2
-      (check-equal? (not-accepts? g1 g2) #t)      
+      (check-equal? (not-accepts? g1 g2) #t)
+      ; Verifica se os termos NÃO aceitos por g2 são aceitos por g1
+      (check-equal? (not-accepts? g2 g1) #t)   
       )))
 
 ;---- Funções auxiliares ----
