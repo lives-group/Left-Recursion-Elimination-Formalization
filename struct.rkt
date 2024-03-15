@@ -29,7 +29,7 @@
     (define (format-sequence seqs)
         (cond
             [(null? seqs) 
-                '()]
+                'ε]
             [(<= (length seqs) 1) 
                 (car (map format-symbol seqs))]
             [else
