@@ -36,9 +36,9 @@
   (+ 1 (random max-seq)))
 
 ; Sorteia um número entre 1 e 3 
-; (1 = recursão direta, 2 = chance de recursão indireta, 3 = sorteio de terminal ou não-terminal)
+; (1 = recursão direta, 2 = chance de recursão indireta)
 (define (get-seq-type)
-  (+ 1 (random 3)))
+  (+ 1 (random 2)))
 
 ; Sorteia um terminal ou não-terminal
 (define (get-term terminals nonterminals)
@@ -74,8 +74,8 @@
 (define (generate-production nonterminal terminals nonterminals)
   (define rhs-size
     (if (eq? 'S nonterminal)
-        max-rhs
-        (get-rhs-size)))
+      max-rhs
+      (get-rhs-size)))
   (list nonterminal 
     (append
       (let loop ((n 0) (acc '()))
@@ -113,8 +113,7 @@
     (get-term nonterminals nonterminals)
     (if (= (+ index 1) seq-size)
       (cond ((= seq-type 1) nonterminal)
-        ((= seq-type 2) (sort-nonterminal nonterminal nonterminals))
-        ((= seq-type 3) (get-term terminals nonterminals)))
+        ((= seq-type 2) (sort-nonterminal nonterminal nonterminals)))
       (get-term terminals nonterminals))))
 
 ; --- Debug ---
@@ -129,10 +128,10 @@
         (loop (+ n 1)))
       (displayln ")"))))
 
-;;; (define terminals (generate-terminals 8))
-;;; (define nonterminals (generate-nonterminals 5))
-;;; (define teste (generate-grammar terminals nonterminals))
-;;; (print-grammar teste)
+(define terminals (generate-terminals 8))
+(define nonterminals (generate-nonterminals 5))
+(define teste (generate-grammar terminals nonterminals))
+(print-grammar teste)
 
 ; --- Chamada do algoritmo clássico ---
 #;(define ordered-productions
