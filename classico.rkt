@@ -57,14 +57,6 @@
               (production_0 ... production ...))
             (production ...) ))]
           (where 1 (check-difference ((nonterminal_0 1) (nonterminal_1 1) ...) ((nonterminal_2 t_1 ...) ...))) "Caso que tem chance de recursão direta")
-
-      ; Caso que não tem recursão
-      (-->
-        [((nonterminal_0 1) ... (nonterminal 1) (nonterminal_1 1) ...)
-         (production ... (nonterminal ()) production_0 ...)]
-         
-        [((nonterminal_0 1) ... (nonterminal_1 1) ...)
-         (production ...  production_0 ...)])
   ))
 
 ; Função que verifica se não há nenhum nonterminal de order contido no primeiro termo de um rhs
