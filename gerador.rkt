@@ -3,15 +3,16 @@
 (provide (all-defined-out))
 
 (require redex
-         "classico.rkt")
+         "struct.rkt")
 
 ; Parâmetros de entrada
 (define max-terminals 5)
 (define min-terminals 3)
-(define max-nonterminals 5) ; O valor máximo de não-terminais é 26, pois usamos letras do alfabeto
-(define min-nonterminals 3)
-(define max-rhs 4)
-(define max-seq 3)
+(define max-nonterminals 4) ; O valor máximo de não-terminais é 26, pois usamos letras do alfabeto
+(define min-nonterminals 2)
+
+(define max-rhs 3)
+(define max-seq 5)
 
 ; Gera os terminais
 (define (generate-terminals size)
@@ -116,28 +117,3 @@
         ((= seq-type 2) (sort-nonterminal nonterminal nonterminals)))
       (get-term terminals nonterminals))))
 
-; --- Debug ---
-
-; Imprime a gramática
-(define (print-grammar grammar)
-  (displayln "(")
-  (let loop ((n 0))
-    (if (< n (length grammar))
-      (begin
-        (displayln (list-ref grammar n))
-        (loop (+ n 1)))
-      (displayln ")"))))
-
-(define terminals (generate-terminals 8))
-(define nonterminals (generate-nonterminals 5))
-(define teste (generate-grammar terminals nonterminals))
-(print-grammar teste)
-
-; --- Chamada do algoritmo clássico ---
-#;(define ordered-productions
- (order-rhs
-     (unify-productions teste)))
-
- ;(traces i--> ordered-productions)
-
-; ------ Fim de Debug ------
