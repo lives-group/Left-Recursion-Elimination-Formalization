@@ -94,9 +94,6 @@
   [(eliminate-left-recursion ((nonterminal_new ((t_0 ...) ...)) (nonterminal ((terminal t ...) ... (nonterminal) seq_2 ... ))))
    (eliminate-left-recursion ((nonterminal_new  ((t_0 ...) ...)) (nonterminal ((terminal t ...) ... seq_2 ... ))))]
 
-  ;;; [(eliminate-left-recursion ((nonterminal_new ((t_0 ...) ...)) (nonterminal ()))) 
-  ;;;  ((nonterminal_new ((t_0 ...) ...)))]
-   
   [(eliminate-left-recursion ((nonterminal_new ((t_0 ...) ...)) (nonterminal ((terminal t ...) ... (nonterminal_1 t_2 ...) ...))))
    ((nonterminal_new ((t_0 ...) ...)) (nonterminal ((terminal t ... nonterminal_new) ... (nonterminal_1 t_2 ... nonterminal_new) ... )))])
 
@@ -186,17 +183,3 @@
   (if (null? lst1)
       lst2
       (cons (car lst1) (concat-list (cdr lst1) lst2))))
-
-
-; Exemplo de uso
-;;; (define ordered-productions
-;;;   (order-rhs
-;;;     (unify-productions '(
-;;;                (S ((B 2) (A 4) (2)))
-;;;                (C ((A) (S 2)))
-;;;                (B ((S 2) (B 3)))
-;;;                (A ((C A) (S 2)))
-;;;                (B ((A) (7 2)))
-;;;                ))))
-
-;;; (traces i--> ordered-productions)
