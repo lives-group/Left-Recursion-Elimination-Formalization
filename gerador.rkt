@@ -11,8 +11,8 @@
 (define max-nonterminals 4) ; O valor máximo de não-terminais é 26, pois usamos letras do alfabeto
 (define min-nonterminals 2)
 
-(define max-rhs 3)
-(define max-seq 5)
+(define max-rhs 3) ; Deve ser maior que 1
+(define max-seq 5) ; Deve ser maior que 1
 
 ; Gera os terminais
 (define (generate-terminals size)
@@ -30,11 +30,11 @@
 
 ; Sorteia o tamanho do rhs
 (define (get-rhs-size)
-  (+ 1 (random max-rhs)))
+  (+ 1 (random (- max-rhs 1))))
 
 ; Sorteia o tamanho da sequência
 (define (get-seq-size)
-  (+ 1 (random max-seq)))
+  (+ 1 (random (- max-seq 1))))
 
 ; Sorteia um número entre 1 e 3 
 ; (1 = recursão direta, 2 = chance de recursão indireta)
@@ -75,7 +75,7 @@
 (define (generate-production nonterminal terminals nonterminals)
   (define rhs-size
     (if (eq? 'S nonterminal)
-      max-rhs
+      (- max-rhs 1)
       (get-rhs-size)))
   (list nonterminal 
     (append
@@ -99,7 +99,7 @@
 (define (generate-sequence nonterminal terminals nonterminals)
   (define seq-size
     (if (eq? 'S nonterminal)
-      max-seq
+      (- max-seq 1)
       (get-seq-size)))
   (let loop ((n 0) (acc '()))
     (if (= n seq-size)

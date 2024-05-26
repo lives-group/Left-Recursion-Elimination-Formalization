@@ -149,3 +149,13 @@
           #t)) 
       terms))
 
+
+; Imprime a gramática
+(define (print-grammar grammar)
+  (displayln "(")
+  (let loop ((n 0))
+    (if (< n (length grammar))
+      (begin
+        (displayln (list-ref grammar n))
+        (loop (+ n 1)))
+      (displayln ")"))))
