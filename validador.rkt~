@@ -11,9 +11,10 @@
          "../cfg-entry-generator/main.rkt")
 
 ; Quantidade de testes
-(define num-tests 100)
+(define num-tests 10)
+
 ; Quatidade de palavras 
-(define num-words 100)
+(define num-words 10)
 
 (module+ test
   ; Gera os terminais

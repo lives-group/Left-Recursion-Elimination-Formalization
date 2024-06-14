@@ -1,0 +1,1 @@
+("8.11.1" ta6le ("28595927ee3729b33ef8cb7fa4127b54a96475a2" . "b5ed40cf93d157c1f86c0a8358fdb42894ff812b") #"/home/elton/Dropbox/Devel/Leo-APEG/Left-Recursion-Elimination-Formalization/cfggen/generator/../util/constants.rkt" (collects #"rackcheck" #"main.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))
