@@ -95,7 +95,7 @@
    (eliminate-left-recursion ((nonterminal_new  ((t_0 ...) ...)) (nonterminal ((terminal t ...) ... seq_2 ... ))))]
 
   [(eliminate-left-recursion ((nonterminal_new ((t_0 ...) ...)) (nonterminal ((terminal t ...) ... (nonterminal_1 t_2 ...) ...))))
-   ((nonterminal_new ((t_0 ...) ...)) (nonterminal ((terminal t ... nonterminal_new) ... (nonterminal_1 t_2 ... nonterminal_new) ... )))])
+   ( (nonterminal ((terminal t ... nonterminal_new) ... (nonterminal_1 t_2 ... nonterminal_new) ... )) (nonterminal_new ((t_0 ...) ...)) )])
 
 ; Função que cria uma novo não terminal que produz o vazio
 (define-metafunction G
