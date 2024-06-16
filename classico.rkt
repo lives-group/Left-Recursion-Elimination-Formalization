@@ -9,14 +9,14 @@
   [trm number]
   [rhs (seq ...)]
   [seq (t ...)]
-  [order (nt flag)]
+  [ord (nt flag)]
   [flag 0 1]
   [t nt trm]
   [prd (nt rhs)]
   [V variable-not-otherwise-mentioned]
   [prds (prd ...)]
-  [orders (order ...)]
-  [grammar (orders prds)])
+  [ords (ord ...)]
+  [grammar (ords prds)])
 
 ; Redução que elimina recursão à esquerda
 (define i-->
@@ -35,20 +35,20 @@
 
       ; Caso que tem chance de recursão indireta
       (-->
-        [(((name n0 nt_!_1) 1) ... (nt_0 1) ((name n1 nt_!_1) 1) ... (nt 0) order_0 ...) 
+        [(((name n0 nt_!_1) 1) ... (nt_0 1) ((name n1 nt_!_1) 1) ... (nt 0) ord_0 ...) 
          (prd ... (nt_0 ((t ...) ...)) prd_0 ... (nt ((trm t_0 ... ) ... (nt_2 t_2 ...) ... (nt_0  t_1 ...) seq_1 ...)) prd_1 ... )]
 
-        [((n0 1) ... (nt_0 1) (n1 1) ... (nt 0) order_0 ...)
+        [((n0 1) ... (nt_0 1) (n1 1) ... (nt 0) ord_0 ...)
          (concat-prds 
-            (prd ... (nt_0 ((t ...) ...)) prd_0 ... (order-prd nt ((trm t_0 ... ) ... (nt_2 t_2 ...) ... (t ... t_1 ...) ... seq_1 ...)))
+            (prd ... (nt_0 ((t ...) ...)) prd_0 ... (ord-prd nt ((trm t_0 ... ) ... (nt_2 t_2 ...) ... (t ... t_1 ...) ... seq_1 ...)))
             (prd_1 ...))] (where 1 (check-difference ((n0 1) ... (nt_0 1) (n1 1) ...) ((nt_2 t_2 ...) ...))) "Caso que tem chance de recursão indireta")
 
       ; Caso que tem chance de recursão direta
       (-->
-        [((nt_0 1) (nt_1 1) ... (nt 0) order ...)
+        [((nt_0 1) (nt_1 1) ... (nt 0) ord ...)
           (prd_0 ...(nt ((trm t_0 ... ) ... (nt_2 t_1 ...) ...)) prd ...)]
           
-        [((nt_0 1) (nt_1 1) ... (nt 1) order ...)
+        [((nt_0 1) (nt_1 1) ... (nt 1) ord ...)
         (concat-prds 
           (prd_0 ...) 
           (concat-prds 
@@ -59,15 +59,15 @@
           (where 1 (check-difference ((nt_0 1) (nt_1 1) ...) ((nt_2 t_1 ...) ...))) "Caso que tem chance de recursão direta")
   ))
 
-; Função que verifica se não há nenhum nt de order contido no primeiro termo de um rhs
+; Função que verifica se não há nenhum nt de ord contido no primeiro termo de um rhs
 (define-metafunction G
-  check-difference : orders rhs -> flag
+  check-difference : ords rhs -> flag
   [(check-difference (((name n0 nt_!_1) _) ...) ((nt_!_1 t ...) (nt_2 t_2 ...) ...))
    (check-difference ((n0 1) ...) ((nt_2 t_2 ...) ...))]
 
-  [(check-difference orders ()) 1]
+  [(check-difference ords ()) 1]
 
-  [(check-difference (order ... (nt flag_1) order_1 ... ) (seq ... (nt t ...) seq_1 ... )) 0])
+  [(check-difference (ord ... (nt flag_1) ord_1 ... ) (seq ... (nt t ...) seq_1 ... )) 0])
 
 ; Função para eliminar recursão à esquerda direta
 (define-metafunction G
@@ -106,23 +106,23 @@
 
 ; Função que ordena uma produção
 (define-metafunction G
-  order-prd : nt rhs -> prd
-  [(order-prd nt ((trm t ...) ... (nt_1 t_0 ...) (nt_2 t_1 ...) ... (trm_0 t_2 ...) seq ...))
-   (order-prd nt ((trm t ...) ... (trm_0 t_2 ...) (nt_1 t_0 ...) (nt_2 t_1 ...) ... seq ...))]
+  ord-prd : nt rhs -> prd
+  [(ord-prd nt ((trm t ...) ... (nt_1 t_0 ...) (nt_2 t_1 ...) ... (trm_0 t_2 ...) seq ...))
+   (ord-prd nt ((trm t ...) ... (trm_0 t_2 ...) (nt_1 t_0 ...) (nt_2 t_1 ...) ... seq ...))]
 
-  [(order-prd nt ((trm t ...) ... (nt_0 t_0 ...) ...))
-    (nt (concat-rhs ((trm t ...) ...)  (order-nt nt () ((nt_0 t_0 ...) ...))))])
+  [(ord-prd nt ((trm t ...) ... (nt_0 t_0 ...) ...))
+    (nt (concat-rhs ((trm t ...) ...)  (ord-nt nt () ((nt_0 t_0 ...) ...))))])
 
 ; Função que ordena os nt de um rhs
 (define-metafunction G
-  order-nt : nt rhs rhs -> rhs
-  [(order-nt nt (seq ...)((nt t ...) seq_1 ...))
-   (order-nt nt ((nt t ...) seq ...)(seq_1 ...))]
+  ord-nt : nt rhs rhs -> rhs
+  [(ord-nt nt (seq ...)((nt t ...) seq_1 ...))
+   (ord-nt nt ((nt t ...) seq ...)(seq_1 ...))]
   
-  [(order-nt (name n0 nt_!_0) (seq ...)(((name n1 nt_!_0) t ...) seq_1 ...))
-   (order-nt n0 (seq ... (n1 t ...))(seq_1 ...))]
+  [(ord-nt (name n0 nt_!_0) (seq ...)(((name n1 nt_!_0) t ...) seq_1 ...))
+   (ord-nt n0 (seq ... (n1 t ...))(seq_1 ...))]
   
-  [(order-nt nt rhs ()) rhs])
+  [(ord-nt nt rhs ()) rhs])
    
 ; Função que unifica duas gramaticas
 (define-metafunction G
@@ -137,7 +137,7 @@
    (seq ... seq_0 ...)])
 
 ; Função que ordena a gramática
-(define (order-rhs prds)
+(define (ord-rhs prds)
   (define nts (add-flag (remove-duplicates (map car prds))))
   (list nts
     (map

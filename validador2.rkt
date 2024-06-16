@@ -28,45 +28,45 @@
       (displayln ")"))))
 
   ; Gera os terminais
-  (define gen:terminals
-    (gen:let ([num-terminals (gen:integer-in min-terminals max-terminals)])
-    (generate-terminals num-terminals)))
+  (define gen:trms
+    (gen:let ([num-trms (gen:integer-in min-trms max-trms)])
+    (generate-trms num-trms)))
 
   ; Gera os não-terminais
-  (define gen:nonterminals
-    (gen:let ([num-nonterminals (gen:integer-in min-nonterminals max-nonterminals)])
-    (generate-nonterminals num-nonterminals)))
+  (define gen:nts
+    (gen:let ([num-nts (gen:integer-in min-nts max-nts)])
+    (generate-nts num-nts)))
 
   ; Gera a gramática
   (define gen:grammar
-    (gen:let ([terminals gen:terminals]
-              [nonterminals gen:nonterminals])
-    (generate-grammar terminals nonterminals)))
+    (gen:let ([trms gen:trms]
+              [nts gen:nts])
+    (generate-grammar trms nts)))
   
-  ; Unifica as produções geradas por um mesmo não-terminal
+  ; Unifica as produções geradas por um mesmo não-trm
   (define gen:grammar-unified
     (gen:let ([grammar gen:grammar])
-    (unify-productions grammar)))
+    (unify-prds grammar)))
   
   ; Ordena o rhs das produções
-  (define gen:grammar-ordered
+  (define gen:grammar-orded
     (gen:let ([grammar gen:grammar-unified])
-    (order-rhs grammar)))
+    (ord-rhs grammar)))
 
 
 
 ;---- Funções auxiliares ----
 ; Verifica se na gramática existe alguma produção recursiva à esquerda
 (define (has-left-recursion? grammar)
-  (define productions (car (cdr grammar)))
-  (define orders (car grammar))
+  (define prds (car (cdr grammar)))
+  (define ords (car grammar))
    
   (ormap
     (lambda (prd)
       (define head (car prd))
       (define rhs (car(cdr prd)))
-      (or  (is-left-recursive-d head rhs) (is-left-recursive-i head rhs orders)))
-    productions))
+      (or  (is-left-recursive-d head rhs) (is-left-recursive-i head rhs ords)))
+    prds))
 
 ; Verifica se uma produção é recursiva à esquerda  de forma direta
 (define (is-left-recursive-d term rhs)
@@ -77,9 +77,9 @@
     rhs))
 
 ; Verifica se uma produção possui possibilidade de recursão à esquerda indireta
-(define (is-left-recursive-i  head rhs orders)
-  (define pre-order (before-list orders head ))
-  (if (eq? pre-order '()) #f
+(define (is-left-recursive-i  head rhs ords)
+  (define pre-ord (before-list ords head ))
+  (if (eq? pre-ord '()) #f
     (ormap
       (lambda (seq)
           (if (eq? seq '()) #f
@@ -87,7 +87,7 @@
               (lambda (term)                
                 (define head-ord (car term))
                 (if (equal? head-ord (car seq)) #t #f))
-              pre-order)
+              pre-ord)
           ))
       rhs)))
 
@@ -162,7 +162,7 @@
 
  (check-property (make-config #:tests num-tests
                               #:deadline (* (+ (current-inexact-milliseconds) 3600000) 24))
-    (property recursaoRemovida ([g1 gen:grammar-ordered])
+    (property recursaoRemovida ([g1 gen:grammar-orded])
       ;Constrói uma lista de palavras aceitas
       (define acc-ws (sample (gen:word-from-grammar (format-input (car (cdr g1)))) num-words))
       ;Constrói uma lista de palavras não aceitas

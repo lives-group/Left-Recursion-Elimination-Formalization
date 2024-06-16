@@ -47,9 +47,9 @@
             [else 
                 (Seq (car (map format-symbol seqs)) (format-seq-helper (cdr seqs)))]))
   
-    (define (format-production nt alts)
+    (define (format-prd nt alts)
         (Production (NT nt) (format-alt alts)))
   
-    (define formatted-input (map (lambda (x) (apply format-production x)) input))
+    (define formatted-input (map (lambda (x) (apply format-prd x)) input))
         `(,@formatted-input))
 

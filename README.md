@@ -8,10 +8,10 @@ A implementação do algoritmo foi realizada utilizando a linguagem de programa�
 
 ### Testes
 Para executar os testes é necessário realizar o download do repositório `CFG entry generator` (https://anonymous.4open.science/r/cfg-entry-generator-7798/) e adicionar o diretório `cfg-entry-generator` no mesmo nível do diretório `Left-Recursion-Elimination-Formalization`. Em seguida, abra o arquivo `validador.rkt` e clique em `Run`. Caso deseje modificar o tamanho da gramática, altere os valores das variáveis no arquivo `gerador.rkt`:
-1. `max-terminals`: quantidade máxima de terminais
-2. `min-terminals`: quantidade mínima de terminais
-3. `max-non-terminals`: quantidade máxima de não-terminais
-4. `min-non-terminals`: quantidade mínima de não-terminais
+1. `max-trms`: quantidade máxima de terminais
+2. `min-trms`: quantidade mínima de terminais
+3. `max-non-trms`: quantidade máxima de não-terminais
+4. `min-non-trms`: quantidade mínima de não-terminais
 5. `max-rhs`: quantidade máxima de termos no lado direito da regra
 6. `max-seq`: tamanho máximo de um termo no lado direito da regra
 
@@ -30,6 +30,6 @@ Exemplo:
                (B ((A) (7 2)))
                ))
 
-(define ordered-productions (order-rhs (unify-productions input)))
-(traces i--> ordered-productions)
+(define orded-prds (ord-rhs (unify-prds input)))
+(traces i--> orded-prds)
 ```
