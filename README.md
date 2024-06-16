@@ -7,7 +7,7 @@ A implementação do algoritmo foi realizada utilizando a linguagem de programa�
 ## Execução
 
 ### Testes
-Para executar os testes é necessário realizar o download do repositório `CFG entry generator` (https://anonymous.4open.science/r/cfg-entry-generator-7798/) e adicionar o diretório `cfg-entry-generator` no mesmo nível do diretório `Left-Recursion-Elimination-Formalization`. Em seguida, abra o arquivo `validador.rkt` e clique em `Run`. Caso deseje modificar o tamanho da gramática, altere os valores das variáveis no arquivo `gerador.rkt`:
+Abra o arquivo `validador.rkt` e clique em `Run`. Caso deseje modificar o tamanho da gramática, altere os valores das variáveis no arquivo `gerador.rkt`:
 1. `max-trms`: quantidade máxima de terminais
 2. `min-trms`: quantidade mínima de terminais
 3. `max-non-trms`: quantidade máxima de não-terminais
