@@ -6,13 +6,13 @@
          "struct.rkt")
 
 ; Parâmetros de entrada
-(define max-trms 5)
-(define min-trms 3)
-(define max-nts 4) ; O valor máximo de não-terminais é 26, pois usamos letras do alfabeto
+(define max-trms 3)
+(define min-trms 2)
+(define max-nts 3) ; O valor máximo de não-terminais é 26, pois usamos letras do alfabeto
 (define min-nts 2)
 
 (define max-rhs 3) ; Deve ser maior que 1
-(define max-seq 5) ; Deve ser maior que 1
+(define max-seq 3) ; Deve ser maior que 1
 
 ; Gera os terminais
 (define (generate-trms size)
