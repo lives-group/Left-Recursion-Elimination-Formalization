@@ -14,10 +14,10 @@
 (provide gen:word-from-grammar gen:distinct-word-from-grammar in-grammar? Production Alt Seq NT T ∅ ε)
 
 ;; return - gerador
-(define (gen:word-from-grammar grammar-list [depth INITIAL-DEPTH] [max-depth MAX-DEPTH])
-  (let ([grammar-hash (reduce-production grammar-list)]
-        [rhs (match (car grammar-list) [(Production _ rhs) rhs] [_ ∅])])
-    (gen:_grammar-derivate-data grammar-hash rhs (list '()) (make-hash) depth max-depth)))
+(define (gen:word-from-grammar grammar-list [depth INITIAL-DEPTH] [max-depth MAX-DEPTH] #:starting-NT[starting-NT 'NONE])
+  (let ([grammar-hash (reduce-production grammar-list)])
+    (let ([rhs (if (eq? starting-NT 'NONE) (match (car grammar-list) [(Production (NT _) r) r] [_ ∅]) (hash-ref grammar-hash starting-NT))])
+    (gen:_grammar-derivate-data grammar-hash rhs (list '()) (make-hash) depth max-depth))))
 
 ;; return - gerador (palavras unicas
 (define (gen:distinct-word-from-grammar grammar-list [depth INITIAL-DEPTH] [max-depth MAX-DEPTH] [word-set (mutable-set)])
@@ -32,10 +32,10 @@
 
 ;; grammar-list : (list (Productions ...)) - Primeira produção de partida
 ;; word - Lista de símbolos
-(define (in-grammar? grammar-list word [depth INITIAL-DEPTH] [max-depth MAX-DEPTH])
-  (let ([grammar-hash (reduce-production grammar-list)]
-        [rhs (match (car grammar-list) [(Production (NT _) r) r] [_ ∅])])
-    (check-in-grammar? grammar-hash rhs word depth max-depth)))
+(define (in-grammar? grammar-list word [depth INITIAL-DEPTH] [max-depth MAX-DEPTH] #:starting-NT[starting-NT 'NONE])
+  (let ([grammar-hash (reduce-production grammar-list)])
+    (let ([rhs (if (eq? starting-NT 'NONE) (match (car grammar-list) [(Production (NT _) r) r] [_ ∅]) (hash-ref grammar-hash starting-NT))])
+    (check-in-grammar? grammar-hash rhs word depth max-depth))))
 
 ;; IMPLEMENTAÇÕES PRIVADAS
 (define (gen:_grammar-derivate-data grammar-hash rhs entries old-results depth max-depth)
@@ -104,7 +104,6 @@
       (let ([derivative-rhs (rhs-derivative grammar-hash rhs symbol depth max-depth)])
         (cond
           ((equal? derivative-rhs ∅) #false)
-          ((rhs-delta grammar-hash rhs) #true)
           ((equal? derivative-rhs ε) #true)
           (else (check-in-grammar? grammar-hash derivative-rhs remaining-word depth max-depth))
           ))))
