@@ -7,10 +7,11 @@
     "struct.rkt")
 
 (define entradaTeste (format-input '(
-               (S ((B 2 3) (5 3)))
+               (S ((B 9 3) (5 3)))
                (B ((B) (S 2 1 2)))
                (C ((A) (3 4) (4 5 5) (1) (D 5)))
                )))
+
 
 (define (format-input-cyk input)
   (define counter 1)
@@ -19,6 +20,9 @@
     (let ((new-nt (string->symbol (string-append "AUX" (number->string counter)))))
       (set! counter (+ counter 1))
       new-nt))
+  
+   (define (num->symbol n)
+    (string->symbol (string (integer->char (+ n 97)))))
   
   (define (format-prd prd)
     (match prd
@@ -29,10 +33,10 @@
   (define (rewrite-rhs rhs)
     (match rhs 
       [(Alt e d) (Alt (rewrite-rhs e) (rewrite-rhs d))]
-      [(Seq (T t) d) (cons t (rewrite-rhs d))]
+      [(Seq (T t) d) (cons (num->symbol t) (rewrite-rhs d))]
       [(Seq (NT nt) d) (cons nt (rewrite-rhs d))]
       [(NT nt) (list nt)] 
-      [(T t) (list t)]
+      [(T t) (list (num->symbol t))]
       [#t (list)]))
 
   (define (coalese-alt rhs)
