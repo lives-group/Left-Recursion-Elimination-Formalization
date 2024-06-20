@@ -49,7 +49,7 @@
 
   (define (process-rhs nt rhs)
     (if (<= (length rhs) 2)
-        (list (cons nt (list rhs)))  ;; Ensure RHS is always wrapped in a list
+        (list (cons nt (list rhs))) 
         (let ((new-nt (generate-new-nt nt)))
           (append (list (list nt (list (car rhs) new-nt)))
                   (process-rhs new-nt (cdr rhs))))))
