@@ -4,15 +4,15 @@
 
 (require redex     
     "cfggen/main.rkt"
-    "cfggen/cyk.rkt"
-    "cfggen/grammar-transforms.rkt"
     "struct.rkt")
 
+(define entradaTeste (format-input '(
+               (S ((B 9 3) (5 3 7)))
+               (B ((B) (S 2 1 2)))
+               (C ((A) (3 4) (4 5 5) (1) (D 5)))
+               )))
 
-(define (numterm->symbol t)
-  (string->symbol (string (integer->char (+ t 97)))))
-
-(define (gramar-to-cnf input)
+(define (format-input-cyk input)
   (define counter 1)
   (define terminals '())
 
@@ -24,7 +24,7 @@
   (define (num->symbol n)
     (let ((sym (string->symbol (string-append "T" (number->string n)))))
       (unless (assoc sym terminals)
-        (set! terminals (cons (cons sym (numterm->symbol n)) terminals)))
+        (set! terminals (cons (cons sym (string->symbol (string (integer->char (+ n 97))))) terminals)))
       sym))
 
   (define (format-prd prd)
@@ -62,23 +62,4 @@
                                     terminals))
   (append formatted-input terminal-productions))
 
-
-; S -> B D
-; B -> C b | ε
-; C -> c
-; D -> d | aD | ε
-
-
-(define g1 (list
- (Production (NT 'S) (Seq (NT 'B) (NT 'D)) )
- (Production (NT 'B) (Alt (Seq (NT 'C) (T 'b)) ε))
- (Production (NT 'C) (Alt (T 'c) (NT 'D)))
- (Production (NT 'D) (Alt (T 'd) (Alt (Seq (T 'a) (NT 'D)) ε)))
- ))
-
-
-(define (grammar-to-cyk g)
-        (gramar-to-cnf (remove-unreachables (remove-ε g)))
-   )
-
-;(displayln (gramar-to-cnf entradaTeste))
+(displayln (format-input-cyk entradaTeste))
