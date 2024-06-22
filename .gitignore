@@ -2,3 +2,5 @@
 *.bak
 /.vscode/
 /debug/
+/cfggen/
+cfggen/
