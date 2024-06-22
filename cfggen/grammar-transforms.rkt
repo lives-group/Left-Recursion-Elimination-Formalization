@@ -83,12 +83,14 @@
   )
 
 (define (_remove-ε grammar nullable-set)
-  (let ([evaluated-NT (car nullable-set)])
-    (let ([rhs (find-named-rhs evaluated-NT grammar)])
-      (if (empty? (cdr nullable-set))
-          (replace-productions-to-NT grammar evaluated-NT rhs)
-          (_remove-ε (replace-productions-to-NT grammar evaluated-NT rhs) (cdr nullable-set))
-    ))))
+  (if (null? nullable-set)
+      grammar
+      (let ([evaluated-NT (car nullable-set)])
+           (let ([rhs (find-named-rhs evaluated-NT grammar)])
+                (if (empty? (cdr nullable-set))
+                    (replace-productions-to-NT grammar evaluated-NT rhs)
+                    (_remove-ε (replace-productions-to-NT grammar evaluated-NT rhs) (cdr nullable-set))
+    )))))
 
 (define (replace-productions-to-NT productions prod-name rhs) ; TODO: repensar o nome
   (match productions
