@@ -9,6 +9,7 @@
 (provide nullable-NTs
          remove-ε
          distribute-grammar
+         reform-grammar
          delete-ε-prod
          reachable
          remove-unreachables
@@ -53,44 +54,38 @@
       (nullable-NTs grammar nullable-set)
       nullable-set))
 
-(define (symplify-ε rhs)
+(define (simplify-ε rhs)
   (match rhs
-    [(Seq #t (Alt x1 x2)) (alt x1 x2)]
-    [(Seq x1 (Alt #t x2)) (alt x1 (seq x1 x2))]
-    [(Seq x1 (Alt x2 #t)) (alt (seq x1 x2) x1)]
-
-    [(Seq (Alt #t x1) x2) (alt x2 (seq x1 x2))]
-    [(Seq (Alt x1 #t) x2) (alt (seq x1 x2) x2)]
-    [(Seq (Alt x1 x2) #t) (alt x1 x2)]
-
-    [(Seq (Alt x1 x2) x3) (cond
-                            ((rhs-delta 'NOOP x2 #:ignore-NT #t) (alt (seq x1 x3) (symplify-ε (seq x2 x3))))
-                            ((rhs-delta 'NOOP x1 #:ignore-NT #t) (alt (symplify-ε (seq x1 x3)) (seq x2 x3)))
-                            (else (seq (alt x1 x2) x3))
-                            )]
-    [(Seq x1 (Alt x2 x3)) (cond
-                            ((rhs-delta 'NOOP x3 #:ignore-NT #t) (alt (seq x1 x2) (symplify-ε (seq x1 x3))))
-                            ((rhs-delta 'NOOP x2 #:ignore-NT #t) (alt (symplify-ε (seq x1 x2)) (seq x1 x3)))
-                            (else (seq x1 (alt x2 x3)))
-                            )]
+    [(Seq #t d) (simplify-ε d)]
+    [(Seq e #t) (simplify-ε e)]
+    [(Alt #t d) (simplify-ε d)]
+    [(Alt e #t) (simplify-ε e)]
     [x x]
   ))
   
 
 (define (remove-ε grammar [start (Production-nt (car grammar)) ])
   (define nullable-set (reverse (nullable-NTs grammar)))
-  (delete-ε-prod (reform-grammar (_remove-ε grammar nullable-set)) (list start))
+  #;(delete-ε-prod (reform-grammar (_remove-ε grammar nullable-set)) (list start))
+  (distribute-grammar (_remove-ε grammar nullable-set))
+  )
+
+(define (rem-ε-seq rhs ns)
+      (match rhs
+        [(Seq e d) (Seq (rem-ε-seq e ns) (rem-ε-seq d ns))]
+        [(Alt e d) (Alt (rem-ε-seq e ns) (rem-ε-seq d ns))]
+        [(NT t)  (cond [(member t ns) (Alt rhs #t) ]
+                       [else           rhs])]
+        [x x]
+        )
   )
 
 (define (_remove-ε grammar nullable-set)
-  (if (null? nullable-set)
-      grammar
-      (let ([evaluated-NT (car nullable-set)])
-           (let ([rhs (find-named-rhs evaluated-NT grammar)])
-                (if (empty? (cdr nullable-set))
-                    (replace-productions-to-NT grammar evaluated-NT rhs)
-                    (_remove-ε (replace-productions-to-NT grammar evaluated-NT rhs) (cdr nullable-set))
-    )))))
+      (define (r-eps p)
+          (Production (Production-nt p) (rem-ε-seq (Production-rhs p) nullable-set))
+       )
+      (map r-eps grammar)
+    )
 
 (define (replace-productions-to-NT productions prod-name rhs) ; TODO: repensar o nome
   (match productions
@@ -100,7 +95,7 @@
 
 (define (replace-rhs-to-NT production prod-name rhs)
   (match production
-    [(Seq l r) (symplify-ε (seq (replace-rhs-to-NT l prod-name rhs) (replace-rhs-to-NT r prod-name rhs)))]
+    [(Seq l r) (simplify-ε (seq (replace-rhs-to-NT l prod-name rhs) (replace-rhs-to-NT r prod-name rhs)))]
     [(Alt l r) (alt (replace-rhs-to-NT l prod-name rhs) (replace-rhs-to-NT r prod-name rhs))]
     [(NT x) (if (eq? x prod-name) rhs (NT x))]
     [x x]
@@ -132,6 +127,11 @@
     [(Production lhs rhs) (Production lhs (reform-rhs (distribute-alts-rhs rhs)))]
     [_ (error ( (~v production) " not an production"))]))
 
+; redistributes sequences over alternatives trougth the whole grammar
+; Also reformats ands and alts to tehir left associative form.
+(define (distribute-grammar g)
+      (map distribute-alts g))
+
 (define (distribute-alts-rhs rhs)
   (match rhs
     [(Seq (Alt ee ed) d) (let ([ee1 (distribute-alts-rhs ee)]
@@ -148,12 +148,12 @@
     [(Alt e d) (Alt (distribute-alts-rhs e) (distribute-alts-rhs d) )]
     [x x]
     ))
+
 (define (build-seq e d)
      (match (cons e d)
-            [(cons (Seq _ _) (Seq _ _))     (Seq e d)]
-            [(cons (Seq _ _) (Alt de dd))   (ins-seq-l e d)]
-            [(cons (Alt ee ed) (Seq _ _))   (ins-seq-r e d)]
-            [(cons (Alt _ _ ) (Alt _ _))    (Alt e d)]
+            [(cons (Alt _ _ ) (Alt _ _))  (Alt (build-seq e) (build-seq d))]
+            [(cons _ (Alt _ _))   (ins-seq-l e d)]
+            [(cons (Alt _ _) _)   (ins-seq-r e d)]
             [_ (Seq e d)]
        )
   )
@@ -167,6 +167,7 @@
     [(Seq e d) (Seq e (Seq d ie))] 
     [(NT v) (Seq (NT v) ie)]
     [(T t)  (Seq (T t) ie)]
+    [#t (Seq #t ie)]
     ))
 
 (define (ins-seq-l ie rhs )
@@ -175,6 +176,7 @@
     [(Seq e d) (Seq ie (Seq e d))] 
     [(NT v) (Seq ie (NT v) )]
     [(T t)  (Seq ie (T t))]
+    [#t (Seq ie #t)]
     ))
 
 
@@ -198,16 +200,14 @@
       [x x]
       )
   )
-; redistributes sequences over alternatives trougth the whole grammar
-; Also reformats ands and alts to tehir left associative form.
-(define (distribute-grammar g)
-      (map distribute-alts g))
+
 
 (define (reform-grammar g)
      (define (rfrm p)
          (Production (Production-nt p) (reform-rhs (Production-rhs p))))
      (map rfrm (distribute-grammar g)
   ))
+
 
 (define (is-empty-prod? p)
    (match p
@@ -238,11 +238,11 @@
     [x x]
    ))
 
-(define (grammar-prod g name)
+(define (get-nt-body g name)
    (cond
      [(null? g) #f]
      [(equal? (NT-String (Production-nt (car g))) name) (Production-rhs (car g))]
-     [else (grammar-prod (cdr g) name)])
+     [else (get-nt-body (cdr g) name)])
  )
 
 (define (nts-from-rhs rhs)
@@ -260,7 +260,7 @@
 (define (reach-q g q r)'D
    (if (null? q)
        (set-union q r)
-       (let ([reaches (remove-duplicates  (nts-from-rhs (grammar-prod g (car q))) )])
+       (let ([reaches (remove-duplicates  (nts-from-rhs (get-nt-body g (car q))) )])
             (reach-q g (append (cdr q)
                                (filter (lambda (x) (not (equal? (car q) x)) ) reaches))
                        (set-union q r)))
@@ -287,23 +287,37 @@
 #;(can-parse? '(b a a a) g2 starts1)
 
 ;;;;;; PRINTING
+(define (prod->string p)
+    (string-append (symbol->string (NT-String (Production-nt p)))
+                   " -> "
+                   (rhs->string (Production-rhs p) 15)
+   )
+ )
 
-(define (rhs->string rhs) ;; TODO: esse print aqui pode ser usado pra depurar o restante do projeto
+(define (parens b s)  (if b (string-append "(" s ")") s))
+; Precedence :
+; Bases Lit, NT, Eps. 0
+; Seq 5
+; Alt 10
+(define (rhs->string rhs prec) ;; TODO: esse print aqui pode ser usado pra depurar o restante do projeto
   (cond ((rhs-empty? rhs) "ε")
         ((rhs-invalid? rhs) "∅")
         (else (match rhs
-                [(Production l r) (string-append (rhs->string l) " -> " (rhs->string r))]
-                [(Seq x1 (Alt x2 x3)) (string-append (rhs->string x1) "(" (rhs->string x2) " | " (rhs->string x3) ")")]
-                [(Seq (Alt x1 x2) x3) (string-append "(" (rhs->string x1) " | " (rhs->string x2) ")" (rhs->string x3) )]
-                [(Seq l r) (string-append (rhs->string l) " " (rhs->string r))]
-                [(Alt l r) (string-append (rhs->string l) " | " (rhs->string r))]
-                [(T x) (if (number? x) (number->string x) (symbol->string x))]
+                [(Seq e d) (parens (< prec 5) (string-append (rhs->string e 5)
+                                                             " "
+                                                             (rhs->string d 4)))]
+                [(Alt e d) (parens (< prec 10) (string-append (rhs->string e 10)
+                                                             " | "
+                                                             (rhs->string d 9)))]
+                [(T x) (if (number? x)
+                           (number->string x)
+                           (symbol->string x))]
                 [(NT x) (symbol->string x)]))))
 
 (define (grammar->string list)
   (if (empty? list)
       "\n"
-      (string-append (rhs->string (car list)) "\n" (grammar->string (cdr list)))))
+      (string-append (prod->string (car list)) "\n" (grammar->string (cdr list)))))
 
 (define (print-grammar g)
     (display (grammar->string g))

@@ -5,7 +5,7 @@
 (require redex     
     "cfggen/main.rkt"
     "cfggen/cyk.rkt"
-    "cfggen/grammar-transforms.rkt"
+    "cfggen/grammar-transforms2.rkt"
     "cfggen/util/structs.rkt"
     "struct.rkt")
 
@@ -181,5 +181,12 @@
                   (car (cyk sword gcyk (make-vector 1 start)))
               ))
    )
+(define teste '((S ((1 2) (A B 2) (B B 2))) 
+(A1 (() (3 2 A1) (1 3 A1))) 
+(A ((1 1 A1))) 
+;(B1 (() (1 1 B1))) 
+(B ((1 3 B)))))
 
+(define testeF (format-input teste))
+(define term '(1 1 1 3 3 2 3 2 1 3 1 1 1 1 2))
 ;(displayln (gramar-to-cnf entradaTeste))
