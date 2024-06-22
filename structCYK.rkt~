@@ -4,15 +4,15 @@
 
 (require redex     
     "cfggen/main.rkt"
+    "cfggen/cyk.rkt"
+    "cfggen/grammar-transforms2.rkt"
+    "cfggen/util/structs.rkt"
     "struct.rkt")
 
-(define entradaTeste (format-input '(
-               (S ((B 9 3) (5 3 7)))
-               (B ((B) (S 2 1 2)))
-               (C ((A) (3 4) (4 5 5) (1) (D 5)))
-               )))
+(define (numterm->symbol t)
+  (string->symbol (string (integer->char (+ t 97)))))
 
-(define (format-input-cyk input)
+(define (grammar-to-cnf input)
   (define counter 1)
   (define terminals '())
 
@@ -24,7 +24,7 @@
   (define (num->symbol n)
     (let ((sym (string->symbol (string-append "T" (number->string n)))))
       (unless (assoc sym terminals)
-        (set! terminals (cons (cons sym (string->symbol (string (integer->char (+ n 97))))) terminals)))
+        (set! terminals (cons (cons sym (numterm->symbol n)) terminals)))
       sym))
 
   (define (format-prd prd)
@@ -36,8 +36,7 @@
   (define (rewrite-rhs rhs)
     (match rhs 
       [(Alt e d) (Alt (rewrite-rhs e) (rewrite-rhs d))]
-      [(Seq (T t) d) (cons (num->symbol t) (rewrite-rhs d))]
-      [(Seq (NT nt) d) (cons nt (rewrite-rhs d))]
+      [(Seq e d) (append (rewrite-rhs e) (rewrite-rhs d))]
       [(NT nt) (list nt)] 
       [(T t) (list (num->symbol t))]
       [#t (list)]))
@@ -62,4 +61,95 @@
                                     terminals))
   (append formatted-input terminal-productions))
 
-(displayln (format-input-cyk entradaTeste))
+(define (grammar-to-cyk g)
+        (post-process-grm (fix-cyk (grammar-to-cnf (remove-unreachables (remove-ε g))))))
+
+(define (is-terminal? x)
+       (and (symbol? x)
+            (string>=? (symbol->string x) "a")
+            (string<=? (symbol->string x) "z")))
+
+(define (rule-body g r)
+   (cond
+     [(null? g) (error (string-append "Undefined name: " (~v r)))]
+     [(equal? (car (car g)) r) (cdr (car g))]
+     [else (rule-body (cdr g) r)]))
+
+(define (rule-all-bodys g r)
+   (cond
+     [(null? g) '()]
+     [(equal? (car (car g)) r) (if (list? (cdr (car g)))
+                                (set-union (cdr (car g)) (rule-all-bodys (cdr g) r))
+                                (rule-all-bodys (cdr g) r))]
+     [else (rule-all-bodys (cdr g) r)]))
+
+(define (romve-uesless g)
+    (define (is-usefull? r)
+      (match r
+          [(list n n) #f]
+          [_ #t]))
+   (filter is-usefull? g))
+
+(define (replace-unit g)
+    (map (lambda (r)
+            (cond
+              [(and (list? r)
+                    (= 2 (length r))
+                       ) (cons (car r) (rule-body g (cadr r)) )]
+              [else r])
+           ) g))
+
+(define (non-eps? r)
+   (match r
+       [(list n '()) #f]
+       [_ #t]))
+
+(define (fix-cyk g)
+        (map (lambda (xs)
+               (if (is-terminal? (car (car (cdr xs))))
+                   (cons (car xs) (car (car (cdr xs))))
+                   (cons (car xs) (car (cdr xs)))))
+             (filter non-eps? g)))
+
+(define (candidates xs q)
+        (filter (lambda (z) (not (member z q))) xs))
+
+(define (reachs g [start (car (car g))] )
+     (define (rchs g q r)       
+          (cond
+            [(null? q) (remove-duplicates r)]
+            [else (rchs g
+                        (append (cdr q) (candidates (rule-all-bodys g (car q)) (set-union q r)))
+                        (cons (car q) r)) ]
+       ))
+       (rchs g (list start) '()))
+
+(define (remove-unreach g [start (car (car g))] )
+     (let ([rs (reachs g start)])
+          (filter (lambda (r) (member (car r) rs)) g)))
+
+(define (post-process-grm g)
+   (remove-unreach (replace-unit (romve-uesless g))))
+
+(define (accept-on-cyk g word [start (NT-String (Production-nt (car g)))])
+        (let ([sword (map numterm->symbol word)]
+              [nullNts (nullable-NTs g) ]
+              [gcyk (grammar-to-cyk g)])
+              (if (and (null? word) (member  start nullNts) )
+                  #t
+                  (car (cyk sword gcyk (make-vector 1 start)))
+<<<<<<< HEAD
+              ))
+   )
+(define teste '((S ((1 2) (A B 2) (B B 2))) 
+(A1 (() (3 2 A1) (1 3 A1))) 
+(A ((1 1 A1))) 
+;(B1 (() (1 1 B1))) 
+(B ((1 3 B)))))
+
+(define testeF (format-input teste))
+(define term '(1 1 1 3 3 2 3 2 1 3 1 1 1 1 2))
+;(displayln (gramar-to-cnf entradaTeste))
+=======
+              )))
+>>>>>>> e154d3d5b190be11d2d5fee0b217d8e37350b046
