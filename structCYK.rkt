@@ -37,7 +37,7 @@
     (match rhs 
       [(Alt e d) (Alt (rewrite-rhs e) (rewrite-rhs d))]
       [(Seq e d) (append (rewrite-rhs e) (rewrite-rhs d))]
-      [(NT nt) (list nt)] 
+      [(NT nt)   (list nt)] 
       [(T t) (list (num->symbol t))]
       [#t (list)]))
 
@@ -56,14 +56,19 @@
   (define (flatten list-of-lists)
     (apply append list-of-lists))
 
-  (define formatted-input (flatten (map format-prd input)))
+  (define formatted-input (flatten (map format-prd (reform-grammar input))))
   (define terminal-productions (map (lambda (t) (list (car t) (list (cdr t))))
                                     terminals))
-  (append formatted-input terminal-productions))
+  (append formatted-input terminal-productions)
+  )
 
-(define (grammar-to-cyk g)
-        (post-process-grm (fix-cyk (grammar-to-cnf (remove-unreachables (remove-ε g))))))
+ 
 
+(define (grammar-to-cyk g [start (NT-String (Production-nt (car g)))])
+        ;(post-process-grm (fix-cyk (grammar-to-cnf (remove-unreachables (remove-ε g)))))
+          (post-process-grm (fix-cyk (grammar-to-cnf (remove-ε g))) start)
+    )
+ 
 (define (is-terminal? x)
        (and (symbol? x)
             (string>=? (symbol->string x) "a")
@@ -128,27 +133,29 @@
      (let ([rs (reachs g start)])
           (filter (lambda (r) (member (car r) rs)) g)))
 
-(define (post-process-grm g)
-   (remove-unreach (replace-unit (romve-uesless g))))
+(define (post-process-grm g [start (car (car g))])
+   ;(remove-unreach (replace-unit (romve-uesless g)))
+    (remove-unreach (replace-unit (romve-uesless g)) start)
+  )
 
 (define (accept-on-cyk g word [start (NT-String (Production-nt (car g)))])
         (let ([sword (map numterm->symbol word)]
               [nullNts (nullable-NTs g) ]
-              [gcyk (grammar-to-cyk g)])
+              [gcyk (grammar-to-cyk g start)])
               (if (and (null? word) (member  start nullNts) )
                   #t
                   (car (cyk sword gcyk (make-vector 1 start)))
               ))
    )
 
-(define teste '((S ((1 2) (A B 2) (B B 2))) 
+#;(define teste '((S ((1 2) (A B 2) (B B 2))) 
                (A1 (() (3 2 A1) (1 3 A1))) 
                (A ((1 1 A1))) 
                (B1 (() (1 1 B1))) 
                (B ((1 3 B1)))))
 
 
-(define testeF (format-input teste))
-(define testeI '(1 2))
-(displayln (grammar-to-cnf testeF))
+;(define testeF (format-input teste))
+;(define testeI '(1 2))
+;(displayln (grammar-to-cnf testeF))
 
